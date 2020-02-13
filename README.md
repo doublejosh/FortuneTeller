@@ -1,6 +1,6 @@
 # Fortune Teller Starter
 
-This code is a starting point for making your fortune teller via Arduino.
+This code is a starting point for making a fortune teller via Arduino.
 
 ### References:
 - [LiquidCrystal](https://www.arduino.cc/en/Reference/LiquidCrystal)
