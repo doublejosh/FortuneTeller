@@ -1,5 +1,6 @@
 #include <LiquidCrystal.h>
 #include "FirebaseESP8266.h"
+#include "utilities.h"
 
 #define FIREBASE_HOST "fortunecalibrator.firebaseio.com"
 #define FIREBASE_AUTH "pwYQO2x4KMEGA9cPXC2VoOV7tJwH7yrPVHuDnUAc"
@@ -13,7 +14,7 @@ String WIFI_PASSWORD[] = {
 };
 uint8_t wifiTry = 0;
 boolean offline = false;
-FirebaseData firebaseData;
+FirebaseData fbData;
 FirebaseJson json;
 
 const int rs = D5,
@@ -226,6 +227,8 @@ const char *FORTUNES[][4][20] = {{
 		"                    "
 	}};
 
+#define GREET1 0
+#define GREET2 1
 const char *MESSAGES[][4][20] = {{
 		"                    ",
 		"  Contemplate your  ",
@@ -249,10 +252,10 @@ int DELAY_MSG = 4000,
     DELAY_ANIMATION = 250,
 		DELAY_SLEEP = 50000;
 
-String eventPath = "/interactions/";
-
 
 // UTILITY.
+
+Utils utils;
 
 void message (const char *msg[4][20]) {
 	paint(msg, DELAY_MSG);
@@ -287,10 +290,27 @@ void event (int fortune, int category, boolean accurate, String heartbeat) {
 	json.set("heartbeat", heartbeat);
 	json.set("version", 1);
 
-	if (Firebase.pushJSON(firebaseData, eventPath, json)) {
+	if (Firebase.pushJSON(fbData, String("/interactions/"), json)) {
 		Serial.println("SAVED");
 	} else Serial.println("SAVE ERROR");
 }
+
+
+		//for (size_t i = 0; i < list.size(); i++) {
+			// Convert to JSON.
+// 			FirebaseJsonData &jsonData = fbData.jsonData();
+// 			list.get(jsonData, i);
+// 			if (jsonData.typeNum == JSON_OBJECT) {
+// 				Serial.println(jsonData.stringValue);
+// 				return jsonData;
+// 			}
+// 			else Serial.println('WRONG TYPE');
+// 		}
+
+// 	} else Serial.println(fbData.errorReason());
+// }
+
+
 
 void connect (void) {
 	for (uint8_t i = 0; i < 2; i++) {
@@ -334,36 +354,42 @@ void connect (void) {
 // APPLICATION.
 
 void coin () {
-	String next;
-
 	Serial.println("TRIGGER");
 	play(WAKE_FRAMES, 19);
-	message(MESSAGES[0]);
+	message(MESSAGES[GREET1]);
 	play(APPEAR_FRAMES, 6);
-	message(MESSAGES[1]);
+	message(MESSAGES[GREET2]);
 	play(APPEAR_FRAMES, 6);
 
-	// ASK QUESTION.
+	// Ask seires of questions.
+	String next, category;
 	if (next = askQuestion("first")) {
-		askQuestion(next);
+		// Learn fortune category.
+		//category = askQuestion(next);
+
+		int f = showFortune();
+		play(APPEAR_FRAMES, 6);
+
+		if (!offline) {
+			// Ask for accuracy.
+
+			// Record interaction.
+			event(f, 2, false, "555.555");
+		}
 	}
+}
 
-	// ASK SECONDARY QUESTION.
-
-	// LEARN CATEGORY.
-
-	int f = showFortune();
-	play(APPEAR_FRAMES, 6);
-
-	// ASK ACCURACY.
-
-	if (!offline) {
-		event(f, 2, false, "555.555");
+void fetchQuestions () {
+	if (Firebase.get(fbData, String("/questions"))) {
+		FirebaseJsonArray &questions = fbData.jsonArray();
+		FirebaseJsonData &jsonData = fbData.jsonData();
+		questions.get(jsonData, 0);
+		Serial.println(jsonData.stringValue);
 	}
 }
 
 String askQuestion (String id) {
-	Serial.print("ASKING QUESTION");
+	Serial.println("ASKING QUESTION");
 	return "abstract";
 }
 
@@ -387,12 +413,12 @@ void sleep () {
 
 void setup (void) {
 	lcd.begin(20, 4);
-  lcd.display();
+  	lcd.display();
 	randomSeed(analogRead(0));
 	pinMode(TRIGGER_PIN, INPUT);
 	Serial.begin(1000000);
 	connect();
-	//fetchContent();
+	fetchQuestions();
 }
 
 void loop (void) {
