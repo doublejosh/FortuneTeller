@@ -1,6 +1,8 @@
 #include <LiquidCrystal.h>
 #include "FirebaseESP8266.h"
 #include "utilities.h"
+#include "animation.h"
+#include "messages.h"
 
 #define FIREBASE_HOST "fortunecalibrator.firebaseio.com"
 #define FIREBASE_AUTH "pwYQO2x4KMEGA9cPXC2VoOV7tJwH7yrPVHuDnUAc"
@@ -31,231 +33,15 @@ const int TRIGGER_PIN = D6;
 
 uint8_t sleepFrame = 0;
 uint32_t timer = 0;
-const char *SLEEP_FRAMES[][4][20] = {{
-		"COIN                ",
-		"                    ",
-		"       _==z=_       ",
-		"     8( u..u )8     "
-	}, {
-		"              PLEASE",
-		"          z         ",
-		"       _====_       ",
-		"     8( u..u )8     "
-	}, {
-		"                    ",
-		"         zZ         ",
-		"       _====_       ",
-		"     8( u..u )8     "
-	}, {
-		"        zZz         ",
-		"                    ",
-		"       _====_       ",
-		"     8( u..u )8     "
-	}};
-
-const char *WAKE_FRAMES[][4][20] = {{
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"     8( o..- )8     "
-	}, {
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"     8( 0..- )8     "
-	}, {
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"     8( -..o )8     "
-	}, {
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"     8( -..O )8     "
-	}, {
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"   q 8( o..0 )8 p   "
-	}, {
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"   q 8( O..O )8 p   "
-	}, {
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"   q 8( 0..0 )8 p   "
-	}, {
-		"                    ",
-		"      . .  . .      ",
-		"   .   _====_   .   ",
-		" . q 8( O..O )8 p . "
-	}, {
-		"         .  .       ",
-		"      `      '      ",
-		"   `   _====_   '   ",
-		" - q 8( O..O )8 p - "
-	}, {
-		"     `        '     ",
-		"  `              '  ",
-		"       _====_       ",
-		"-  q 8( O..O )8 p  -"
-	}, {
-		" `                ' ",
-		"                    ",
-		"       _====_       ",
-		"   q 8( 0..0 )8 p   "
-	}, {
-		"                   '",
-		"                    ",
-		"       _====_       ",
-		"   q 8( O..O )8 p   "
-	}, {
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"   q 8( O..- )8 p   "
-	}, {
-		"                    ",
-		"           wink     ",
-		"       _====_       ",
-		"   q 8( O..- )8 p   "
-	}, {
-		"                    ",
-		"      . .  . .      ",
-		"   _ - _====_ - _   ",
-		" _ q 8( O..O )8 p _ "
-	}, {
-		"        .  .        ",
-		"     `        '     ",
-		"  . `  _====_  ' .  ",
-		" . q 8( O..O )8 p . "
-	}, {
-		"    .          .    ",
-		"   .            .   ",
-		" -                - ",
-		" -  q  _====_  p   -"
-	}, {
-		"   `            '   ",
-		"  -              -  ",
-		"`                  '",
-		"-    q _====_ p    -"
-	}, {
-		".                  .",
-		"                    ",
-		"                    ",
-		"      q      p      "
-  }};
-
-const char *APPEAR_FRAMES[][4][20] = {{
-		"                    ",
-		"                    ",
-		"                    ",
-		"      q      p      "
-	}, {
-		"                    ",
-		"                    ",
-		"                    ",
-		"     q _====_ p     "
-	}, {
-		"                    ",
-		"                    ",
-		"                    ",
-		"    q  _====_  p    "
-	}, {
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"   q 8( O..O )8 p   "
-	}, {
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"  q  8( -..O )8  p  "
-	}, {
-		"                    ",
-		"                    ",
-		"       _====_       ",
-		"   q 8( O..- )8 p   "
-  }};
-
-const char *QUESTIONS[][4][20] = {{
-		"                    ",
-		"   Can you reason   ",
-		"   your way out of  "
-		"   this one?        ",
-		"                    "
-	}, {
-		"                    ",
-		"   Is there love    ",
-		"   in this story?   ",
-		"                    "
-	}, {
-		"                    ",
-		"  health vs wealth  ",
-		"                    ",
-		"                    "
-	}};
-
-const char *FORTUNES[][4][20] = {{
-    "A hunch is just     ",
-    "creativity trying to",
-    "tell you something. ",
-		"                    "
-  }, {
-		"A soft voice may be ",
-		"awfully persuasive. ",
-		"                    ",
-		"                    "
-  	}, {
-		"Adventure can be    ",
-		"real happiness.     ",
-		"                    ",
-		"                    "
-	}, {
-		"At the touch of love",
-		"everyone becomes a  ",
-		"poet.               ",
-		"                    "
-	}, {
-		"A friend is a       ",
-		"present you give    ",
-		"yourself.           ",
-		"                    "
-	}};
-
-#define GREET1 0
-#define GREET2 1
-const char *MESSAGES[][4][20] = {{
-		"                    ",
-		"  Contemplate your  ",
-		"  uncertainty...    ",
-		"                    "
-	}, {
-		"                    ",
-		"   actually,        ",
-		"       perhaps...   ",
-		"                    "
-	}, {
-		"                    ",
-		"    WiFi Error :(   ",
-		"                    ",
-		"                    "
-	}};
-
-//Frames frames;
 
 int DELAY_MSG = 4000,
     DELAY_ANIMATION = 250,
 		DELAY_SLEEP = 50000;
 
-
-// UTILITY.
-
 Utils utils;
+
+
+// UTILITIY.
 
 void message (const char *msg[4][20]) {
 	paint(msg, DELAY_MSG);
@@ -309,7 +95,6 @@ void event (int fortune, int category, boolean accurate, String heartbeat) {
 
 // 	} else Serial.println(fbData.errorReason());
 // }
-
 
 
 void connect (void) {
