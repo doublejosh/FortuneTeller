@@ -1,5 +1,6 @@
 #define GREET1 0
 #define GREET2 1
+#define BOOT 3
 const char *MESSAGES[][4][20] = {{
 		"                    ",
 		"  Contemplate your  ",
@@ -13,6 +14,11 @@ const char *MESSAGES[][4][20] = {{
 	}, {
 		"                    ",
 		"    WiFi Error :(   ",
+		"                    ",
+		"  * OFFLINE MODE *  "
+	}, {
+		"                    ",
+		"      Hello :)      ",
 		"                    ",
 		"                    "
 	}};
@@ -30,8 +36,8 @@ const char *QUESTIONS[][4][20] = {{
 		"                    "
 	}, {
 		"                    ",
-		"  health vs wealth  ",
-		"                    ",
+		"  Can you go        ",
+		"  without?          ",
 		"                    "
 	}};
 
