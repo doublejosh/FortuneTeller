@@ -1,9 +1,20 @@
 #include <LiquidCrystal.h>
 #include "FirebaseESP8266.h"
-#include <HashMap.h>
-#include "utilities.h"
+#include "StringSplitter.h"
 #include "animation.h"
 #include "messages.h"
+
+const int rs = D5,
+		  en = D0,
+		  d4 = D1,
+		  d5 = D2,
+		  d6 = D3,
+		  d7 = D4;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+const uint8_t TRIGGER_PIN = D6,
+			  BTN1_PULLUP = D7,
+			  BTN2_PULLUP = D8;
 
 #define FIREBASE_HOST "fortunecalibrator.firebaseio.com"
 #define FIREBASE_AUTH "pwYQO2x4KMEGA9cPXC2VoOV7tJwH7yrPVHuDnUAc"
@@ -20,60 +31,82 @@ boolean offline = false;
 FirebaseData fbData;
 FirebaseJson fbJson;
 
-const int rs = D5,
-	en = D0,
-	d4 = D1,
-	d5 = D2,
-	d6 = D3,
-	d7 = D4;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-#define WIDTH 20
-#define HEIGHT 4
-
-const int TRIGGER_PIN = D6;
-
 uint8_t sleepFrame = 0;
 uint32_t timer = 0;
 
-int DELAY_MSG = 4000,
-    DELAY_ANIMATION = 250,
-		DELAY_SLEEP = 50000;
 
-typedef struct {
-   uint8_t id;
-   String name;
-   String text;
-   String nextNo;
-   String nextYes;
-} Question;
+// CONFIG.
 
-Question Q_LIST[3];
+#define WIDTH 20
+#define HEIGHT 4
+
+uint16_t DELAY_MSG = 4000,
+   DELAY_ANIMATION = 250,
+	   DELAY_SLEEP = 50000;
 
 
 // UTILITIY.
 
-void message (const char *msg[4][20]) {
+typedef struct {
+	uint8_t id;
+	String name;
+	String text;
+	String nextNo;
+	String nextYes;
+} Question;
+
+typedef struct {
+	String text;
+	String category;
+	unsigned int votes;
+} Fortune;
+
+Question Q_LIST[3];
+
+void message (char msg[4][WIDTH+1]) {
 	paint(msg, DELAY_MSG);
 }
 
-void play (const char *frames[][4][20], uint8_t count) {
+void play (char frames[][4][WIDTH+1], uint8_t count) {
 	for (uint8_t f = 0; f < count; f++) {
 		paint(frames[f], DELAY_ANIMATION);
 	}
 }
 
-void paint (const char *screen[4][20], int wait) {
+void paint (char screen[4][WIDTH+1], int wait) {
 	lcd.noDisplay();
 	lcd.clear();
-
 	for (uint8_t i = 0; i < sizeof(screen); i++) {
 		lcd.setCursor(0, i);
-		lcd.print(String(screen[0][i]));
-		// Serial.println(String(screen[0][i]));
+		lcd.print(String(screen[i]));
 	}
-
 	lcd.display();
 	delay(wait);
+}
+
+void txtToScreen (String msg, int row) {
+	lcd.clear();
+	lcd.setCursor(0, row);
+	lcd.print(msg);
+	delay(DELAY_MSG);
+	// char screen[HEIGHT][WIDTH+1];
+
+	// const char* arr = {};
+	// //char* buffer[WIDTH+1] = {};
+	// for (uint8_t i=0; i<HEIGHT; i++) {
+	// 	String slice = msg.substring(i*WIDTH, (i*WIDTH)+WIDTH);
+	// 	arr = slice.c_str();
+	// 	for (uint8_t c=0; c<WIDTH; c++) {
+	// 		screen[i][c] = arr[c];
+	// 		// slice += "\0";
+	// 		// buffer = slice.c_str(WIDTH);
+	// 		//slice.toCharArray(buffer, WIDTH);
+	// 		//screen[i] = slice.c_str();
+	// 		//Serial.println(sizeof(screen[i]));
+	// 	}
+	// 	arr = "";
+	// }
+	// paint(screen, DELAY_MSG);
 }
 
 void event (int fortune, int category, boolean accurate, String heartbeat) {
@@ -97,11 +130,9 @@ void connect (void) {
 
 		Serial.print("Connecting to: ");
 		Serial.println(WIFI_SSID[i]);
-		lcd.clear();
-		lcd.setCursor(0, 1);
-		lcd.print(String("Connecting to:"));
+		txtToScreen("Connecting to:", 1);
 		lcd.setCursor(0, 2);
-		lcd.print(WIFI_SSID[i]);
+		lcd.print(WIFI_SSID[i].substring(0, 20));
 
 		while (WiFi.status() != WL_CONNECTED) {
 			Serial.print(" .");
@@ -118,20 +149,14 @@ void connect (void) {
 		if (WiFi.status() == WL_CONNECTED) {
 			Serial.println("Connected: ");
 			Serial.println(WiFi.localIP());
-			lcd.clear();
-			lcd.setCursor(0, 1);
-			lcd.print(String("Connected:"));
-			lcd.setCursor(0, 2);
-			lcd.print(WiFi.localIP());
-			delay(DELAY_MSG);
+			txtToScreen("Connected:", 1);
+			String wifi = WiFi.localIP().toString();
+			txtToScreen(wifi, 2);
 			break;
 		}
 		else {
 			Serial.println("Unable to connect.");
-			lcd.clear();
-			lcd.setCursor(0, 1);
-			lcd.print(String("Unable to connect."));
-			delay(DELAY_MSG);
+			txtToScreen("Unable to connect.", 1);
 		}
 	}
 
@@ -152,9 +177,6 @@ String getField (String key) {
 	if (Firebase.getShallowData(fbData, key)) {
 		if (fbData.dataType() == "string") {
 			String text = fbData.stringData();
-			//char *buffer;
-			//text.toCharArray(buffer, sizeof(text));
-			//return buffer;
 			return text;
 		}
 	} else Serial.println(fbData.errorReason());
@@ -170,6 +192,8 @@ Question getQuestion (uint8_t i, String name, String &key) {
 }
 
 void fetchQuestions () {
+	txtToScreen("Fetching questions.", 1);
+
 	String key = "/questions";
   	if (Firebase.getShallowData(fbData, key)) {
 		FirebaseJson json;
@@ -181,7 +205,6 @@ void fetchQuestions () {
 			if (_val == "true") {
 				Question question = getQuestion(i, _key, key + "/" + _key);
 				Q_LIST[i] = question;
-				//Serial.println(key + "/" + _key);
 			}
 		}
 		json.iteratorEnd();
@@ -190,19 +213,23 @@ void fetchQuestions () {
 }
 
 void askQuestion (String *id) {
-	Question q;
+	Question question;
 	uint8_t len = sizeof(Q_LIST) / sizeof(Q_LIST[0]);
 	for (uint8_t i = 0; i < len; i++) {
-		q = Q_LIST[i];
-		if (q.name == *id) {
-			Serial.println(q.text);
-			lcd.clear();
-			lcd.setCursor(0, 1);
-			lcd.print(q.text);
-			delay(DELAY_MSG);
+		question = Q_LIST[i];
+		if (question.name == *id) {
+			Serial.println(question.text);
+			txtToScreen(question.text, 1);
 			break;
 		}
 	}
+
+	// Receive a vote.
+	int sensorValue = digitalRead(2);
+
+	// Decide if done.
+
+	// Ask another question.
 }
 
 int showFortune () {
@@ -212,6 +239,7 @@ int showFortune () {
 }
 
 void coin () {
+	// Greeting routine.
 	Serial.println("TRIGGER");
 	play(WAKE_FRAMES, 19);
 	message(MESSAGES[GREET1]);
@@ -220,6 +248,12 @@ void coin () {
 	play(APPEAR_FRAMES, 6);
 
 	String next = "first";
+	askQuestion(&next);
+
+	next = "concrete";
+	askQuestion(&next);
+
+	next = "abstract";
 	askQuestion(&next);
 
 	int f = showFortune();
@@ -247,13 +281,14 @@ void sleep () {
 
 void setup (void) {
 	lcd.begin(20, 4);
-  	lcd.display();
-	randomSeed(analogRead(0));
 	pinMode(TRIGGER_PIN, INPUT);
+	pinMode(BTN1_PULLUP, INPUT_PULLUP);
+	pinMode(BTN2_PULLUP, INPUT_PULLUP);
 	Serial.begin(1000000);
 	message(MESSAGES[BOOT]);
 	connect();
 	fetchQuestions();
+	randomSeed(analogRead(0));
 }
 
 void loop (void) {

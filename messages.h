@@ -1,7 +1,11 @@
+#define WIDTH 20
+#define HEIGHT 4
+
 #define GREET1 0
 #define GREET2 1
 #define BOOT 3
-const char *MESSAGES[][4][20] = {{
+
+char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"                    ",
 		"  Contemplate your  ",
 		"  uncertainty...    ",
@@ -23,25 +27,7 @@ const char *MESSAGES[][4][20] = {{
 		"                    "
 	}};
 
-const char *QUESTIONS[][4][20] = {{
-		"                    ",
-		"   Can you reason   ",
-		"   your way out of  "
-		"   this one?        ",
-		"                    "
-	}, {
-		"                    ",
-		"   Is there love    ",
-		"   in this story?   ",
-		"                    "
-	}, {
-		"                    ",
-		"  Can you go        ",
-		"  without?          ",
-		"                    "
-	}};
-
-const char *FORTUNES[][4][20] = {{
+char FORTUNES[][HEIGHT][WIDTH+1] = {{
     "A hunch is just     ",
     "creativity trying to",
     "tell you something. ",

@@ -1,26 +1,29 @@
-const char *SLEEP_FRAMES[][4][20] = {{
-		"COIN                ",
+#define WIDTH 20
+#define HEIGHT 4
+
+char SLEEP_FRAMES[][HEIGHT][WIDTH+1] = {{
 		"                    ",
-		"       _==z=_       ",
-		"     8( u..u )8     "
-	}, {
-		"              PLEASE",
-		"          z         ",
-		"       _====_       ",
-		"     8( u..u )8     "
+		"COIN          PLEASE",
+		"      _==z=_        ",
+		"    8( u..u )8      "
 	}, {
 		"                    ",
-		"         zZ         ",
-		"       _====_       ",
-		"     8( u..u )8     "
+		"COIN     z    PLEASE",
+		"      _====_        ",
+		"    8( u..u )8      "
 	}, {
-		"        zZz         ",
 		"                    ",
-		"       _====_       ",
-		"     8( u..u )8     "
+		"COIN    zZ    PLEASE",
+		"      _====_        ",
+		"    8( u.,u )8      "
+	}, {
+		"       zZz          ",
+		"COIN          PLEASE",
+		"      _====_        ",
+		"    8( u.;u )8      "
 	}};
 
-const char *WAKE_FRAMES[][4][20] = {{
+char WAKE_FRAMES[][HEIGHT][WIDTH+1] = {{
 		"                    ",
 		"                    ",
 		"       _====_       ",
@@ -117,7 +120,7 @@ const char *WAKE_FRAMES[][4][20] = {{
 		"      q      p      "
   }};
 
-const char *APPEAR_FRAMES[][4][20] = {{
+char APPEAR_FRAMES[][HEIGHT][WIDTH+1] = {{
 		"                    ",
 		"                    ",
 		"                    ",
