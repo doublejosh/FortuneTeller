@@ -3,24 +3,24 @@
 
 char SLEEP_FRAMES[][HEIGHT][WIDTH+1] = {{
 		"                    ",
-		"COIN          PLEASE",
-		"      _==z=_        ",
-		"    8( u..u )8      "
+		" COIN           PLZ ",
+		"       _==z=_       ",
+		"     8( u..u )8     "
 	}, {
 		"                    ",
-		"COIN     z    PLEASE",
-		"      _====_        ",
-		"    8( u..u )8      "
+		" COIN      z    PLZ ",
+		"       _====_       ",
+		"     8( u..u )8     "
 	}, {
 		"                    ",
-		"COIN    zZ    PLEASE",
-		"      _====_        ",
-		"    8( u.,u )8      "
+		" COIN     zZ    PLZ ",
+		"       _====_       ",
+		"     8( u.,u )8     "
 	}, {
-		"       zZz          ",
-		"COIN          PLEASE",
-		"      _====_        ",
-		"    8( u.;u )8      "
+		"        zZz         ",
+		" COIN           PLZ ",
+		"       _====_       ",
+		"     8( u.;u )8     "
 	}};
 
 char WAKE_FRAMES[][HEIGHT][WIDTH+1] = {{

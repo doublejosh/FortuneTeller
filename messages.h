@@ -4,27 +4,51 @@
 #define GREET1 0
 #define GREET2 1
 #define BOOT 3
+#define SAVE 4
+#define FUTURE 5
+#define GREET3 6
+#define RANDOM 7
 
 char MESSAGES[][HEIGHT][WIDTH+1] = {{
-		"                    ",
+		"*                  *",
 		"  Contemplate your  ",
 		"  uncertainty...    ",
-		"                    "
+		"*                  *"
 	}, {
-		"                    ",
-		"   actually,        ",
-		"       perhaps...   ",
-		"                    "
+		"*                  *",
+		"   I wonder what    ",
+		"  you're wondering? ",
+		"*                  *"
 	}, {
-		"                    ",
+		"*                  *",
 		"    WiFi Error :(   ",
 		"                    ",
-		"  * OFFLINE MODE *  "
+		"*   OFFLINE MODE   *"
 	}, {
+		"|-                -|",
+		"|--   Hello :)   --|",
+		"|---            ---|",
+		"|------------------|"
+	}, {
+		"*                  *",
+		"   Our meeting has  ",
+		"     been saved.    ",
+		"*                  *"
+	}, {
+		"*                  *",
+		"   Future fortunes  ",
+		"    now adjusted.   ",
+		"*                  *"
+	}, {
+		"    Answer a few    ",
+		"     questions.     ",
 		"                    ",
-		"      Hello :)      ",
-		"                    ",
-		"                    "
+		"NO <<<       >>> YES"
+	}, {
+		"*                  *",
+		"    Random choice   ",
+		"       picked.      ",
+		"*                  *"
 	}};
 
 char FORTUNES[][HEIGHT][WIDTH+1] = {{
