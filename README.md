@@ -1,5 +1,4 @@
-[!https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/joypixels/239/crystal-ball_1f52e.png]
-
+![Crystal Ball](https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/joypixels/239/crystal-ball_1f52e.png)
 # FORTUNE Calibrator
 
 Arduino fortune teller, with real-world interaction metrics.
@@ -16,5 +15,4 @@ Arduino fortune teller, with real-world interaction metrics.
 1. Wire display, buttons, and switch.
 1. Create sample data.
 
-### References:
-- [Starter](https://github.com/doublejosh/FortuneExample)
+### [Simple Starter](https://github.com/doublejosh/FortuneExample)
