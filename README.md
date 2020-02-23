@@ -7,6 +7,7 @@ Arduino fortune teller, with real-world interaction metrics.
 - Content and usage data via Firebase
 - Two arcade buttons
 - Coin slot trigger
+- Boot modes: free play, "no chrome" quick interactions
 
 ## Build Your Own
 1. Clone the code and upload to Arduino.
