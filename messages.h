@@ -62,7 +62,7 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"                    ",
 		"  Oh good, thanks!  ",
 		"                    ",
-		" I'm remember that. "
+		"   I'll remember.   "
 	}, {
 		"                    ",
 		"      Huh, ok.      ",
