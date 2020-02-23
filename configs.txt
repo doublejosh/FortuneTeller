@@ -21,6 +21,8 @@ const int displayRS = D5,
   displayD6 = D3,
   displayD7 = D4;
 
+bool NOCHROME = false;
+
 #define WIDTH 20
 #define HEIGHT 4
 
@@ -29,4 +31,4 @@ uint16_t DELAY_MSG = 4000,
 	     DELAY_SLEEP = 40, // Loop count.
   QUESTION_TIMEOUT = 30000;
 
-#define NOCHROME true
+#define DEBUG true

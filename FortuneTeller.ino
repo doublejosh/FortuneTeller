@@ -1,12 +1,11 @@
 #include <LiquidCrystal.h>
 #include "FirebaseESP8266.h"
+#include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
 #include <math.h>
 #include "utilities.h"
 #include "animation.h"
 #include "messages.h"
-
-// SETUP...
 
 typedef struct {
 	uint8_t id;
@@ -23,11 +22,12 @@ typedef struct {
 
 FirebaseData fbData;
 FirebaseJson fbJson;
-DynamicJsonDocument jsonDoc(1024);
-Question Q_LIST[3];
+DynamicJsonDocument jsonDoc(JSON_DOC_BYTES);
+Question Q_LIST[QUESTION_LIST_LENGTH];
 uint8_t wifiTry = 0, sleepFrame = 0;
 uint32_t timer = 1;
 boolean offline = false;
+uint16_t trigger;
 
 LiquidCrystal lcd(
 	displayRS, displayEN, displayD4,
@@ -35,10 +35,12 @@ LiquidCrystal lcd(
 );
 
 
+// SCREEN...
+
 /**
  * Show animation frame to the screen.
  */
-void paint (char screen[4][WIDTH+1], int wait) {
+void paint (char screen[HEIGHT][WIDTH+1], int wait) {
 	lcd.noDisplay();
 	lcd.clear();
 	for (uint8_t i = 0; i < sizeof(screen); i++) {
@@ -50,16 +52,9 @@ void paint (char screen[4][WIDTH+1], int wait) {
 }
 
 /**
- * Show frame from UI message list.
- */
-void message (char msg[4][WIDTH+1]) {
-	paint(msg, DELAY_MSG);
-}
-
-/**
  * Loop through and show animation frames.
  */
-void play (char frames[][4][WIDTH+1], uint8_t count) {
+void play (char frames[][HEIGHT][WIDTH+1], uint8_t count) {
 	for (uint8_t f = 0; f < count; f++) {
 		paint(frames[f], DELAY_ANIMATION);
 	}
@@ -68,11 +63,11 @@ void play (char frames[][4][WIDTH+1], uint8_t count) {
 /**
  * Show text message on the screen.
  */
-void txtToScreen (String msg, int row) {
+void txtToScreen (String msg, int wait, int row) {
 	lcd.clear();
 	lcd.setCursor(0, row);
 	lcd.print(msg);
-	delay(DELAY_MSG);
+	delay(wait);
 	// char screen[HEIGHT][WIDTH+1];
 
 	// const char* arr = {};
@@ -94,25 +89,6 @@ void txtToScreen (String msg, int row) {
 }
 
 /**
- * Save interaction online.
- */
-void event (int fortune, String category, boolean accurate, String heartbeat) {
-	Serial.println("SAVING...");
-	fbJson.clear();
-	fbJson.set("fortune", fortune);
-	fbJson.set("category", category);
-	fbJson.set("accurate", accurate);
-	fbJson.set("heartbeat", heartbeat);
-	fbJson.set("version", 1);
-
-	if (!NOCHROME) message(MESSAGES[SAVE]);
-	if (Firebase.pushJSON(fbData, String("/interactions/"), fbJson)) {
-		Serial.println("SAVED");
-		if (!NOCHROME) message(MESSAGES[FUTURE]);
-	} else Serial.println("SAVE ERROR");
-}
-
-/**
  * Handle wifi connection.
  */
 bool connect (void) {
@@ -121,11 +97,11 @@ bool connect (void) {
 
 		Serial.print("Connecting: ");
 		Serial.println(WIFI_SSID[i]);
-		if (!NOCHROME) txtToScreen("Connecting: " + WIFI_SSID[i].substring(0, 8), 1);
+		if (!NOCHROME) txtToScreen("Connecting: " + WIFI_SSID[i].substring(0, 8), DELAY_MSG, 1);
 
 		while (WiFi.status() != WL_CONNECTED) {
 			Serial.print(" .");
-			delay(3000);
+			delay(WIFI_RETRY_DELAY);
 			if (wifiTry == 4) {
 				WiFi.disconnect();
 				Serial.println();
@@ -138,26 +114,27 @@ bool connect (void) {
 		if (WiFi.status() == WL_CONNECTED) {
 			Serial.println("Connected: ");
 			Serial.println(WiFi.localIP());
-			if (!NOCHROME) txtToScreen("Connected.", 1);
+			if (!NOCHROME) txtToScreen("Connected.", DELAY_QUICK_MSG, 1);
 			String wifi = WiFi.localIP().toString();
-			if (!NOCHROME) txtToScreen(wifi, 2);
+			if (!NOCHROME) txtToScreen(wifi, DELAY_MSG, 2);
 			break;
 		}
 		else {
 			Serial.println("Unable to connect.");
-			txtToScreen("Unable to connect.", 1);
+			txtToScreen("Unable to connect.", DELAY_MSG, 1);
 		}
 	}
 
   	if (WiFi.status() != WL_CONNECTED) {
 		Serial.println("Unable to connect.");
-    	message(MESSAGES[2]);
+    	paint(MESSAGES[2], DELAY_MSG);
 		offline = true;
 		return false;
   	} else {
-		Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
-		Firebase.setReadTimeout(fbData, READ_TIMEOUT);
-		Firebase.reconnectWiFi(true);
+			Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+			Firebase.reconnectWiFi(true);
+			Firebase.setReadTimeout(fbData, READ_TIMEOUT);
+			Firebase.setMaxRetry(fbData, FIREBASE_MAX_TRY);
 		return true;
 	}
 }
@@ -194,7 +171,7 @@ Question getQuestion (uint8_t i, String name, String &key) {
  * Get list of questions online and stash for later.
  */
 void fetchQuestions () {
-	if (!NOCHROME) txtToScreen("Fetching questions.", 1);
+	if (!NOCHROME) txtToScreen("Fetching questions.", DELAY_QUICK_MSG, 1);
 	String path = "/questions";
 	if (Firebase.getShallowData(fbData, path)) {
 
@@ -282,17 +259,37 @@ JsonObject buildFortuneIndex(String jsonStr, String index[]) {
 }
 
 /**
+ * Save interaction online.
+ */
+void saveInteraction (int fortune, String category, boolean accurate, String heartbeat) {
+	Serial.println("SAVING...");
+	fbJson.clear();
+	fbJson.set("fortune", fortune);
+	fbJson.set("category", category);
+	fbJson.set("accurate", accurate);
+	fbJson.set("heartbeat", heartbeat);
+	fbJson.set("version", 1);
+
+	if (!NOCHROME) paint(MESSAGES[SAVE], DELAY_MSG);
+	if (Firebase.pushJSON(fbData, String("/interactions/"), fbJson)) {
+		Serial.println("SAVED");
+		if (!NOCHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
+	} else Serial.println("SAVE ERROR");
+}
+
+/**
  * Get fortune online based on chosen category.
  */
 void fetchFortune (const String category) {
-	if (!NOCHROME) txtToScreen("Fetching fortune.", 1);
+	if (!NOCHROME) paint(MESSAGES[FETCHING], DELAY_MSG);
+	print("Fortune category: " + category);
 	// Fetch relevant fortunes.
 	QueryFilter query;
 	query.orderBy("category");
 	query.equalTo(category);
 	query.limitToFirst(10);
 	String path = "/fortunes";
-	String index[FORTUNE_CAT_INDEX_MAX];
+	String index[FORTUNE_INDEX_MAX];
 	if (Firebase.getJSON(fbData, path, query)) {
 		FirebaseJson &json = fbData.jsonObject();
 		String jsonStr;
@@ -303,24 +300,24 @@ void fetchFortune (const String category) {
 		uint8_t picker = random(0, listObj.size());
 		const char* fortune = listObj[index[picker]]["text"];
 		Serial.println(fortune);
-		txtToScreen(fortune, 0);
+		txtToScreen(fortune, DELAY_FORTUNE, 0);
 		increaseCount(index[picker].c_str(), "shown");
 
 		// Ask for accuracy.
-		message(MESSAGES[ACCURATE]);
+		paint(MESSAGES[ACCURATE], DELAY_NONE);
 		int result = ask();
 		if (result == ANSWER_YES) {
-			message(MESSAGES[CORRECT]);
+			paint(MESSAGES[CORRECT], DELAY_MSG);
 			increaseCount(index[picker].c_str(), "votes");
 		} else if (result == ANSWER_NO) {
-			message(MESSAGES[WRONG]);
+			paint(MESSAGES[WRONG], DELAY_MSG);
 		} else {
-			message(MESSAGES[TIMEOUT]);
+			paint(MESSAGES[TIMEOUT], DELAY_MSG);
 		}
 
 		// Record interaction data.
 		unsigned int fortuneId = atoi(index[picker].c_str());
-		event(fortuneId, category, result, "555.555");
+		saveInteraction(fortuneId, category, result, "555.555");
 
 	} else Serial.println(fbData.errorReason());
 
@@ -341,10 +338,7 @@ void askQuestion (String id) {
 		if (question.name == id) {
 			Serial.println(question.text);
 			if (!NOCHROME) play(APPEAR_FRAMES, 6);
-			// Print manually to avoid delay in txtToScreen.
-			lcd.clear();
-			lcd.setCursor(0, 0);
-			lcd.print(question.text);
+			txtToScreen(question.text, DELAY_NONE, 0);
 			questionFound = true;
 			break;
 		}
@@ -360,13 +354,13 @@ void askQuestion (String id) {
 	int result = ask();
 	// Go to the next step.
 	if (result == ANSWER_YES) {
-		txtToScreen("You picked YES.", 1);
+		txtToScreen("You picked YES.", DELAY_QUICK_MSG, 1);
 		askQuestion(question.nextYes);
 	} else if (result == ANSWER_NO) {
-		txtToScreen("You picked NO.", 1);
+		txtToScreen("You picked NO.", DELAY_QUICK_MSG, 1);
 		askQuestion(question.nextNo);
 	} else {
-		message(MESSAGES[RANDOM]);
+		paint(MESSAGES[RANDOM], DELAY_MSG);
 		askQuestion((random(9) % 2) ? question.nextYes : question.nextNo);
 	}
 }
@@ -379,11 +373,11 @@ void coin () {
 	Serial.println("Coin!");
 	if (!NOCHROME) {
 		play(WAKE_FRAMES, 19);
-		message(MESSAGES[GREET1]);
+		paint(MESSAGES[GREET1], DELAY_MSG);
 		play(APPEAR_FRAMES, 6);
-		message(MESSAGES[GREET2]);
+		paint(MESSAGES[GREET2], DELAY_QUICK_MSG);
 		play(APPEAR_FRAMES, 6);
-		message(MESSAGES[GREET3]);
+		paint(MESSAGES[GREET3], DELAY_QUICK_MSG);
 	}
 	// Start question tree.
 	String next = "first";
@@ -396,7 +390,7 @@ void coin () {
 void sleep () {
 	timer++;
 	if (timer == DELAY_SLEEP) {
-		paint(SLEEP_FRAMES[sleepFrame], 0);
+		paint(SLEEP_FRAMES[sleepFrame], DELAY_NONE);
 		sleepFrame = (sleepFrame < 3) ? sleepFrame + 1 : 0;
 		timer = 0;
 	}
@@ -414,7 +408,15 @@ void setup (void) {
 	Serial.begin(1000000);
 	randomSeed(analogRead(0));
 
-	if (!NOCHROME) message(MESSAGES[BOOT]);
+	// On-the-fly alternate modes.
+	if (digitalRead(BTN1_PULLUP) == LOW) {
+		NOCHROME = true;
+	}
+	if (digitalRead(BTN2_PULLUP) == LOW) {
+		FREEPLAY = true;
+	}
+
+	if (!NOCHROME) paint(MESSAGES[BOOT], DELAY_QUICK_MSG);
 	else {
 		lcd.setCursor(0, 1);
 		lcd.print("      8(*__*)8");
@@ -422,12 +424,13 @@ void setup (void) {
 
 	if (connect()) {
 		fetchQuestions();
-		paint(SLEEP_FRAMES[0], 0);
+		paint(SLEEP_FRAMES[0], DELAY_NONE);
 	}
 }
 
 void loop (void) {
-	int trigger = digitalRead(TRIGGER_PIN);
-	if (trigger == HIGH) coin();
-	else sleep();
+	trigger = digitalRead(TRIGGER_PIN);
+	if (trigger == HIGH || (FREEPLAY && digitalRead(BTN2_PULLUP) == LOW)) {
+		coin();
+	} else sleep();
 }

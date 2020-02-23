@@ -12,6 +12,7 @@
 #define CORRECT 9
 #define WRONG 10
 #define TIMEOUT 11
+#define FETCHING 12
 
 char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"*                  *",
@@ -67,12 +68,17 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"                    ",
 		"      Huh, ok.      ",
 		"                    ",
-		" I'm remember that. "
+		"   I'll remember.   "
 	}, {
 		"                    ",
 		"       Hello?       ",
 		"                    ",
 		"    Another coin?   "
+}, {
+	  "!                  !",
+	  "    Calibrating     ",
+		"    your fortune.   ",
+		"!                  !"
 }};
 
 char FORTUNES[][HEIGHT][WIDTH+1] = {{

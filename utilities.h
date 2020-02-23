@@ -2,7 +2,7 @@
 
 
 /**
- * Simple text output.
+ * Simple text output (refactor in progress).
  **/
 void print (String msg) {
     if (DEBUG) {

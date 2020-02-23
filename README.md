@@ -14,6 +14,7 @@ Arduino fortune teller, with real-world interaction metrics.
 1. Rename `configs.txt` to `configs.h` and add credentials.
 1. Wire display, buttons, and switch.
 1. Create sample data.
+1. Update `FIREBASE_RESPONSE_SIZE` in `Firebase_ESP8266_Client`.
 
 ## Hardware
 - Wemos D1 Mini (Arduino)
