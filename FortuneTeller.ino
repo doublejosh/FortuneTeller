@@ -105,9 +105,9 @@ void event (int fortune, String category, boolean accurate, String heartbeat) {
 	fbJson.set("heartbeat", heartbeat);
 	fbJson.set("version", 1);
 
+	if (!NOCHROME) message(MESSAGES[SAVE]);
 	if (Firebase.pushJSON(fbData, String("/interactions/"), fbJson)) {
 		Serial.println("SAVED");
-		if (!NOCHROME) message(MESSAGES[SAVE]);
 		if (!NOCHROME) message(MESSAGES[FUTURE]);
 	} else Serial.println("SAVE ERROR");
 }
@@ -345,8 +345,9 @@ void askQuestion (String id) {
 		if (question.name == id) {
 			Serial.println(question.text);
 			if (!NOCHROME) play(APPEAR_FRAMES, 6);
-			// @todo Avoid this delay.
-			txtToScreen(question.text, 0);
+			lcd.clear();
+			lcd.setCursor(0, 0);
+			lcd.print(question.text);
 			questionFound = true;
 			break;
 		}

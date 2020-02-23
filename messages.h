@@ -35,8 +35,8 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"|------------------|"
 	}, {
 		"*                  *",
-		"   Our meeting has  ",
-		"     been saved.    ",
+		"   Our meeting is   ",
+		"    being saved.    ",
 		"*                  *"
 	}, {
 		"*                  *",
