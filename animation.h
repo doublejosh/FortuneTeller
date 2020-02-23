@@ -2,23 +2,23 @@
 #define HEIGHT 4
 
 char SLEEP_FRAMES[][HEIGHT][WIDTH+1] = {{
+		"COIN             PLZ",
 		"                    ",
-		" COIN           PLZ ",
 		"       _==z=_       ",
 		"     8( u..u )8     "
 	}, {
-		"                    ",
-		" COIN      z    PLZ ",
+		"COIN             PLZ",
+		"           z        ",
 		"       _====_       ",
 		"     8( u..u )8     "
 	}, {
-		"                    ",
-		" COIN     zZ    PLZ ",
+		"COIN             PLZ",
+		"          zZ        ",
 		"       _====_       ",
 		"     8( u.,u )8     "
 	}, {
-		"        zZz         ",
-		" COIN           PLZ ",
+		"COIN    zZz      PLZ",
+		"                    ",
 		"       _====_       ",
 		"     8( u.;u )8     "
 	}};
@@ -44,17 +44,17 @@ char WAKE_FRAMES[][HEIGHT][WIDTH+1] = {{
 		"       _====_       ",
 		"     8( -..O )8     "
 	}, {
-		"                    ",
+		"  A coin!           ",
 		"                    ",
 		"       _====_       ",
 		"   q 8( o..0 )8 p   "
 	}, {
-		"                    ",
+		"  A coin!           ",
 		"                    ",
 		"       _====_       ",
 		"   q 8( O..O )8 p   "
 	}, {
-		"                    ",
+		"  A coin!           ",
 		"                    ",
 		"       _====_       ",
 		"   q 8( 0..0 )8 p   "

@@ -1,0 +1,32 @@
+#define FIREBASE_HOST "myproject.firebaseio.com"
+#define FIREBASE_AUTH "123ABC"
+
+String WIFI_SSID[] = {
+  "Wifi Name",
+  "Mobile Hotspot"
+};
+String WIFI_PASSWORD[] = {
+  "Wifi Password",
+  "Hotspot Password"
+};
+
+const uint8_t TRIGGER_PIN = D8,
+  BTN1_PULLUP = D7,
+  BTN2_PULLUP = D6;
+
+const int displayRS = D5,
+  displayEN = D0,
+  displayD4 = D1,
+  displayD5 = D2,
+  displayD6 = D3,
+  displayD7 = D4;
+
+#define WIDTH 20
+#define HEIGHT 4
+
+uint16_t DELAY_MSG = 4000,
+   DELAY_ANIMATION = 250,
+	     DELAY_SLEEP = 40, // Loop count.
+  QUESTION_TIMEOUT = 30000;
+
+#define NOCHROME true

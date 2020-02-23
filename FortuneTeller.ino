@@ -1,82 +1,43 @@
 #include <LiquidCrystal.h>
 #include "FirebaseESP8266.h"
-#include "StringSplitter.h"
+#include <ArduinoJson.h>
 #include <math.h>
+#include "utilities.h"
 #include "animation.h"
 #include "messages.h"
 
-const int rs = D5,
-		  en = D0,
-		  d4 = D1,
-		  d5 = D2,
-		  d6 = D3,
-		  d7 = D4;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-
-const uint8_t TRIGGER_PIN = D6,
-			  BTN1_PULLUP = D7,
-			  BTN2_PULLUP = D8;
-
-#define FIREBASE_HOST "fortunecalibrator.firebaseio.com"
-#define FIREBASE_AUTH "pwYQO2x4KMEGA9cPXC2VoOV7tJwH7yrPVHuDnUAc"
-String WIFI_SSID[] = {
-  "FBIsurveillanceVan-2.4G",
-  "WingCommander"
-};
-String WIFI_PASSWORD[] = {
-  "camstamp",
-  "whatdidyousay"
-};
-uint8_t wifiTry = 0;
-boolean offline = false;
-FirebaseData fbData;
-FirebaseJson fbJson;
-
-uint8_t sleepFrame = 0;
-uint32_t timer = 0;
-
-
-// CONFIG.
-
-#define WIDTH 20
-#define HEIGHT 4
-
-#define NOCHROME true
-
-uint16_t DELAY_MSG = 4000,
-   DELAY_ANIMATION = 250,
-	   	 DELAY_SLEEP = 50000, // Loop count.
-	QUESTION_TIMEOUT = 30000;
-
-
-// UTILITIY.
+// SETUP...
 
 typedef struct {
 	uint8_t id;
 	String name;
-	String text;
-	String nextNo;
 	String nextYes;
+	String nextNo;
+	String text;
 } Question;
 
 typedef struct {
+	unsigned int id;
 	String text;
-	String category;
-	unsigned int votes;
 } Fortune;
 
+FirebaseData fbData;
+FirebaseJson fbJson;
+DynamicJsonDocument jsonDoc(1024);
 Question Q_LIST[3];
+uint8_t wifiTry = 0, sleepFrame = 0;
+uint32_t timer = 1;
+boolean offline = false;
 
-void message (char msg[4][WIDTH+1]) {
-	paint(msg, DELAY_MSG);
-}
+LiquidCrystal lcd(
+	displayRS, displayEN, displayD4,
+	displayD5, displayD6, displayD7
+);
 
-void play (char frames[][4][WIDTH+1], uint8_t count) {
-	for (uint8_t f = 0; f < count; f++) {
-		paint(frames[f], DELAY_ANIMATION);
-	}
-}
 
+/**
+ * Show animation frame to the screen.
+ */
 void paint (char screen[4][WIDTH+1], int wait) {
 	lcd.noDisplay();
 	lcd.clear();
@@ -88,6 +49,25 @@ void paint (char screen[4][WIDTH+1], int wait) {
 	delay(wait);
 }
 
+/**
+ * Show frame from UI message list.
+ */
+void message (char msg[4][WIDTH+1]) {
+	paint(msg, DELAY_MSG);
+}
+
+/**
+ * Loop through and show animation frames.
+ */
+void play (char frames[][4][WIDTH+1], uint8_t count) {
+	for (uint8_t f = 0; f < count; f++) {
+		paint(frames[f], DELAY_ANIMATION);
+	}
+}
+
+/**
+ * Show text message on the screen.
+ */
 void txtToScreen (String msg, int row) {
 	lcd.clear();
 	lcd.setCursor(0, row);
@@ -113,7 +93,10 @@ void txtToScreen (String msg, int row) {
 	// paint(screen, DELAY_MSG);
 }
 
-void event (int fortune, int category, boolean accurate, String heartbeat) {
+/**
+ * Save interaction online.
+ */
+void event (int fortune, String category, boolean accurate, String heartbeat) {
 	Serial.println("SAVING...");
 	fbJson.clear();
 	fbJson.set("fortune", fortune);
@@ -129,7 +112,10 @@ void event (int fortune, int category, boolean accurate, String heartbeat) {
 	} else Serial.println("SAVE ERROR");
 }
 
-void connect (void) {
+/**
+ * Handle wifi connection.
+ */
+bool connect (void) {
 	for (uint8_t i = 0; i < 2; i++) {
 		WiFi.begin(WIFI_SSID[i], WIFI_PASSWORD[i]);
 
@@ -139,8 +125,8 @@ void connect (void) {
 
 		while (WiFi.status() != WL_CONNECTED) {
 			Serial.print(" .");
-			delay(2000);
-			if (wifiTry == 3) {
+			delay(3000);
+			if (wifiTry == 4) {
 				WiFi.disconnect();
 				Serial.println();
 				wifiTry = 0;
@@ -167,15 +153,21 @@ void connect (void) {
 		Serial.println("Unable to connect.");
     	message(MESSAGES[2]);
 		offline = true;
+		return false;
   	} else {
 		Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+		Firebase.setReadTimeout(fbData, READ_TIMEOUT);
 		Firebase.reconnectWiFi(true);
+		return true;
 	}
 }
 
 
-// APPLICATION.
+// APPLICATION...
 
+/**
+ * Retrieve fields within JSON data.
+ */
 String getField (String key) {
 	if (Firebase.getShallowData(fbData, key)) {
 		if (fbData.dataType() == "string") {
@@ -185,95 +177,177 @@ String getField (String key) {
 	} else Serial.println(fbData.errorReason());
 }
 
+/**
+ * Get cached data for specific question.
+ */
 Question getQuestion (uint8_t i, String name, String &key) {
 	Question question = { i, name,
-		getField(key + "/text"),
 		getField(key + "/nextYes"),
-		getField(key + "/nextNo")
+		getField(key + "/nextNo"),
+		getField(key + "/text")
 	};
+	Serial.println(fbData.jsonString());
 	return question;
 }
 
+/**
+ * Get list of questions online and stash for later.
+ */
 void fetchQuestions () {
 	if (!NOCHROME) txtToScreen("Fetching questions.", 1);
+	String path = "/questions";
+	if (Firebase.getShallowData(fbData, path)) {
 
-	String key = "/questions";
-	if (Firebase.getShallowData(fbData, key)) {
 		FirebaseJson json;
-		size_t count = json.iteratorBegin(fbData.jsonString().c_str());
+		size_t lineCount = json.iteratorBegin(fbData.jsonString().c_str());
 		String _key, _val;
 		int _type = 0;
-		for (size_t i = 0; i < count; i++) {
+		for (size_t i = 0; i < lineCount; i++) {
 			json.iteratorGet(i, _type, _key, _val);
 			if (_val == "true") {
-				Question question = getQuestion(i, _key, key + "/" + _key);
+				Question question = getQuestion(i, _key, path + "/" + _key);
 				Q_LIST[i] = question;
 			}
+			yield();
 		}
 		json.iteratorEnd();
 	}
 	else Serial.println(fbData.errorReason());
 }
 
-void fetchFortune (String category) {
-	if (!NOCHROME) txtToScreen("Fetching fortune.", 1);
+/**
+ * Boost the vote of a fortune.
+ */
+void increaseVote(String key) {
+	int votes;
+	String path = "/fortunes/" + key + "/votes";
 
-	// Query filter for now, pick category.
+	if (Firebase.getInt(fbData, path)) {
+		votes = fbData.intData();
+		Serial.println("Votes: " + votes);
+		if (Firebase.setInt(fbData, path, votes+1)) {
+			print("Votes updated.");
+		} else Serial.println(fbData.errorReason());
+	} else Serial.println(fbData.errorReason());
 }
 
-void askQuestion (String *id) {
+/**
+ * Get fortune online based on chosen category.
+ */
+void fetchFortune (const String category) {
+	if (!NOCHROME) txtToScreen("Fetching fortune.", 1);
+	QueryFilter query;
+	query.orderBy("category");
+	query.equalTo(category);
+	query.limitToFirst(10);
+	String path = "/fortunes";
+	String index[FORTUNE_CAT_INDEX_MAX];
+	uint8_t picker;
+
+	if (Firebase.getJSON(fbData, path, query)) {
+		FirebaseJson &json = fbData.jsonObject();
+		String jsonStr;
+		json.toString(jsonStr, true);
+
+		DeserializationError e = deserializeJson(jsonDoc, jsonStr);
+		if (e.code() == DeserializationError::NoMemory) {
+			Serial.print(F("Not enough JSON memory."));
+		}
+		// Create index of ids.
+		JsonObject listObj = jsonDoc.as<JsonObject>();
+		uint8_t id = 0;
+		for (JsonObject::iterator i=listObj.begin(); i!=listObj.end(); ++i) {
+			index[id] = i->key().c_str();
+			id++;
+			// Keeps the ESP watchdog happy.
+			delay(0);
+		}
+		// Pick from the list.
+		picker = random(0, listObj.size());
+		const char* fortune = listObj[index[picker]]["text"];
+		Serial.println(fortune);
+		txtToScreen(fortune, 0);
+
+		// Ask for accuracy.
+
+
+		// Record interaction data.
+		increaseVote(index[picker].c_str());
+		event(atoi(index[picker].c_str()), category, false, "555.555");
+
+	} else Serial.println(fbData.errorReason());
+
+	// @todo Handle failures.
+}
+
+/**
+ * Get the questioned requested from cache.
+ * Display and provide time to answer.
+ * Handle end of question tree.
+ */
+void askQuestion (String id) {
+	// Grab data from cached global and show.
 	Question question;
+	bool questionFound = false;
 	uint8_t len = sizeof(Q_LIST) / sizeof(Q_LIST[0]);
 	for (uint8_t i = 0; i < len; i++) {
 		question = Q_LIST[i];
-		if (question.name == *id) {
+		if (question.name == id) {
 			Serial.println(question.text);
+			if (!NOCHROME) play(APPEAR_FRAMES, 6);
+			// @todo Avoid this delay.
 			txtToScreen(question.text, 0);
+			questionFound = true;
 			break;
 		}
 	}
+	if (!questionFound) {
+		// @todo Get sensor reading.
+		fetchFortune(id);
+		// @todo Handle no fortune.
+		return;
+	}
 
+	// Time boundary on question.
 	int seconds;
 	unsigned long startTime = millis(),
-							currentTime = millis();
-
+				currentTime = millis();
 	while (currentTime - startTime <= QUESTION_TIMEOUT) {
 		currentTime = millis();
 		uint8_t seconds = (currentTime - startTime) / 1000;
-		// Print seconds since question appeared.
 		lcd.setCursor(18, 3);
 		lcd.print("  ");
 		lcd.setCursor(18, 3);
 		lcd.print(String((QUESTION_TIMEOUT / 1000) - seconds));
-
-		// Receive a vote.
-		if (digitalRead(BTN1_PULLUP) == LOW) {
-			txtToScreen("Voted.", 1);
-			break;
+		// Accept the answer.
+		bool voteYes = (digitalRead(BTN2_PULLUP) == LOW);
+		if (voteYes || (digitalRead(BTN1_PULLUP) == LOW)) {
+			String answer = (voteYes) ? "YES" : "NO";
+			txtToScreen("Answered: " + answer, 1);
+			if (voteYes) {
+				Serial.println("Chosen: " + question.nextYes);
+				askQuestion(question.nextYes);
+				return;
+			}
+			else {
+				Serial.println("Chosen: " + question.nextNo);
+				askQuestion(question.nextNo);
+				return;
+			}
 		}
 		delay(200);
 	}
-
 	// Pick random vote.
-	//message(MESSAGES[RANDOM]);
-
-
-	// Decide if done.
-
-
-	// Ask another question.
+	message(MESSAGES[RANDOM]);
+	askQuestion((random(9) % 2) ? question.nextYes : question.nextNo);
 }
 
-int showFortune (String category) {
-	fetchFortune(category);
-	int f = random(sizeof(FORTUNES[0]) / sizeof(FORTUNES));
-	message(FORTUNES[f]);
-	return f;
-}
-
+/**
+ * Handle kickoff of interaction.
+ */
 void coin () {
 	// Greeting routine.
-	Serial.println("TRIGGER");
+	Serial.println("Coin!");
 	if (!NOCHROME) {
 		play(WAKE_FRAMES, 19);
 		message(MESSAGES[GREET1]);
@@ -281,32 +355,15 @@ void coin () {
 		message(MESSAGES[GREET2]);
 		play(APPEAR_FRAMES, 6);
 		message(MESSAGES[GREET3]);
-		play(APPEAR_FRAMES, 6);
 	}
-
-
+	// Start question tree.
 	String next = "first";
-	askQuestion(&next);
-
-	next = "concrete";
-	askQuestion(&next);
-
-	next = "abstract";
-	askQuestion(&next);
-
-	int f = showFortune(next);
-	if (!NOCHROME) play(APPEAR_FRAMES, 6);
-
-	if (!offline) {
-		// Receive a vote.
-
-		// Increase fortune votes.
-
-		// Record interaction data.
-		event(f, 2, false, "555.555");
-	}
+	askQuestion(next);
 }
 
+/**
+ * Listen for coins and nudge animation.
+ */
 void sleep () {
 	timer++;
 	if (timer == DELAY_SLEEP) {
@@ -314,10 +371,11 @@ void sleep () {
 		sleepFrame = (sleepFrame < 3) ? sleepFrame + 1 : 0;
 		timer = 0;
 	}
+	delay(10);
 }
 
 
-// STANDARD.
+// STANDARD...
 
 void setup (void) {
 	lcd.begin(20, 4);
@@ -325,55 +383,22 @@ void setup (void) {
 	pinMode(BTN1_PULLUP, INPUT_PULLUP);
 	pinMode(BTN2_PULLUP, INPUT_PULLUP);
 	Serial.begin(1000000);
+	randomSeed(analogRead(0));
+
 	if (!NOCHROME) message(MESSAGES[BOOT]);
 	else {
 		lcd.setCursor(0, 1);
-		lcd.print("     -q(-__-)p-");
+		lcd.print("      8(*__*)8");
 	}
-	connect();
-	fetchQuestions();
-	randomSeed(analogRead(0));
+
+	if (connect()) {
+		fetchQuestions();
+		paint(SLEEP_FRAMES[0], 0);
+	}
 }
 
 void loop (void) {
-	const int trigger = digitalRead(TRIGGER_PIN);
+	int trigger = digitalRead(TRIGGER_PIN);
 	if (trigger == HIGH) coin();
 	else sleep();
 }
-
-
-
-
-
-
-// FirebaseJson &json = fbData.jsonObject();
-// String jsonStr;
-// json.first.toString(jsonStr);
-// Serial.println(jsonStr);
-
-// size_t len = json.iteratorBegin();
-// String key, value = "";
-// int type = 0;
-// for (size_t i = 0; i < len; i++) {
-//     json.iteratorGet(i, type, key, value);
-//     Serial.print(i);
-//     Serial.print(", ");
-//     Serial.print("Type: ");
-//     Serial.print(type);
-//     if (type == JSON_OBJECT) {
-//         Serial.print(", Key: ");
-//         Serial.print(key);
-//     }
-//     Serial.print(", Value: ");
-//     Serial.println(value);
-// }
-// json.iteratorEnd();
-
-// FirebaseJsonArray &questionList = fbData.jsonArray();
-// for (size_t i = 0; i < questionList.size(); i++) {
-// 	FirebaseJsonData &jsonData = fbData.jsonData();
-// 	questionList.get(jsonData, i);
-// 	fbJson.get(jsonData, "text");
-
-// 	//Serial.println(jsonData.stringValue);
-// }

@@ -21,9 +21,9 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"*                  *"
 	}, {
 		"*                  *",
-		"    WiFi Error :(   ",
-		"                    ",
-		"*   OFFLINE MODE   *"
+		"     WiFi Error,   ",
+		"     restart.      ",
+		"*                  *"
 	}, {
 		"|-                -|",
 		"|--   Hello :)   --|",
@@ -40,10 +40,10 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"    now adjusted.   ",
 		"*                  *"
 	}, {
-		"    Answer a few    ",
-		"     questions.     ",
+		"   Use buttons to   ",
+		"  answer questions. ",
 		"                    ",
-		"NO <<<       >>> YES"
+		"<<< NO      YES >>> "
 	}, {
 		"*                  *",
 		"    Random choice   ",
