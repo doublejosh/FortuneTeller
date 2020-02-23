@@ -8,6 +8,7 @@
 #define FUTURE 5
 #define GREET3 6
 #define RANDOM 7
+#define ACCURATE 8
 
 char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"*                  *",
@@ -49,6 +50,11 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"    Random choice   ",
 		"       picked.      ",
 		"*                  *"
+	}, {
+		"                    ",
+		"  Was your fortune  ",
+		"     on target?     ",
+		"                    "
 	}};
 
 char FORTUNES[][HEIGHT][WIDTH+1] = {{

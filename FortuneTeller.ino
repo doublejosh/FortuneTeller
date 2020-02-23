@@ -218,13 +218,14 @@ void fetchQuestions () {
 /**
  * Boost the vote of a fortune.
  */
-void increaseVote(String key) {
+void increaseCount(String fortuneId, String field) {
 	int votes;
-	String path = "/fortunes/" + key + "/votes";
-
+	String path = "/fortunes/" + fortuneId + "/" + field;
 	if (Firebase.getInt(fbData, path)) {
 		votes = fbData.intData();
-		Serial.println("Votes: " + votes);
+		Serial.print("Vote Count: ");
+		Serial.println(votes);
+		// Update value.
 		if (Firebase.setInt(fbData, path, votes+1)) {
 			print("Votes updated.");
 		} else Serial.println(fbData.errorReason());
@@ -232,48 +233,98 @@ void increaseVote(String key) {
 }
 
 /**
+ * Wait and collect a yes no answer from user.
+ */
+#define ANSWER_YES 1
+#define ANSWER_NO 0
+#define ANSWER_SKIP -1
+int8_t ask () {
+	// Time boundary on question.
+	int seconds;
+	unsigned long startTime = millis(),
+				currentTime = millis();
+	while (currentTime - startTime <= QUESTION_TIMEOUT) {
+		currentTime = millis();
+		uint8_t seconds = (currentTime - startTime) / 1000;
+		lcd.setCursor(18, 3);
+		lcd.print("  ");
+		lcd.setCursor(18, 3);
+		lcd.print(String((QUESTION_TIMEOUT / 1000) - seconds));
+		// Accept the answer.
+		bool voteYes = (digitalRead(BTN2_PULLUP) == LOW);
+		if (voteYes || (digitalRead(BTN1_PULLUP) == LOW)) {
+			String answer = (voteYes) ? "YES" : "NO";
+			txtToScreen("Answered: " + answer, 1);
+			return (voteYes) ? ANSWER_YES : ANSWER_NO;
+		}
+		delay(200);
+	}
+	return ANSWER_SKIP;
+}
+
+/**
+ * Organize fortunes into indexed list, to pick randomly, etc.
+ */
+JsonObject buildFortuneIndex(String jsonStr, String index[]) {
+	// Parse JSON from string.
+	DeserializationError e = deserializeJson(jsonDoc, jsonStr);
+	if (e.code() == DeserializationError::NoMemory) {
+		Serial.print(F("Not enough JSON memory."));
+	}
+	// Create index of ids.
+	JsonObject listObj = jsonDoc.as<JsonObject>();
+	uint8_t id = 0;
+	for (JsonObject::iterator i=listObj.begin(); i!=listObj.end(); ++i) {
+		index[id] = String(i->key().c_str());
+		id++;
+		// Keep the ESP watchdog happy (avoid soft reset).
+		delay(0);
+	}
+	return listObj;
+}
+
+/**
  * Get fortune online based on chosen category.
  */
 void fetchFortune (const String category) {
 	if (!NOCHROME) txtToScreen("Fetching fortune.", 1);
+	// Fetch relevant fortunes.
 	QueryFilter query;
 	query.orderBy("category");
 	query.equalTo(category);
 	query.limitToFirst(10);
 	String path = "/fortunes";
 	String index[FORTUNE_CAT_INDEX_MAX];
-	uint8_t picker;
-
 	if (Firebase.getJSON(fbData, path, query)) {
 		FirebaseJson &json = fbData.jsonObject();
 		String jsonStr;
 		json.toString(jsonStr, true);
 
-		DeserializationError e = deserializeJson(jsonDoc, jsonStr);
-		if (e.code() == DeserializationError::NoMemory) {
-			Serial.print(F("Not enough JSON memory."));
-		}
-		// Create index of ids.
-		JsonObject listObj = jsonDoc.as<JsonObject>();
-		uint8_t id = 0;
-		for (JsonObject::iterator i=listObj.begin(); i!=listObj.end(); ++i) {
-			index[id] = i->key().c_str();
-			id++;
-			// Keeps the ESP watchdog happy.
-			delay(0);
-		}
 		// Pick from the list.
-		picker = random(0, listObj.size());
+		JsonObject listObj = buildFortuneIndex(jsonStr, index);
+		uint8_t picker = random(0, listObj.size());
 		const char* fortune = listObj[index[picker]]["text"];
 		Serial.println(fortune);
 		txtToScreen(fortune, 0);
+		increaseCount(index[picker].c_str(), "shown");
 
 		// Ask for accuracy.
-
+		message(MESSAGES[ACCURATE]);
+		int result = ask();
+		String msg;
+		if (result == ANSWER_YES) {
+			msg = "Oh good, thanks!";
+			increaseCount(index[picker].c_str(), "votes");
+		} else if (result == ANSWER_NO) {
+			msg = "Ok, thanks. I'll remember that.";
+		} else {
+			msg = "Hello? Another coin?";
+		}
+		txtToScreen(msg, 1);
 
 		// Record interaction data.
-		increaseVote(index[picker].c_str());
-		event(atoi(index[picker].c_str()), category, false, "555.555");
+		unsigned int fortuneId = atoi(index[picker].c_str());
+		event(fortuneId, category, result, "555.555");
 
 	} else Serial.println(fbData.errorReason());
 
