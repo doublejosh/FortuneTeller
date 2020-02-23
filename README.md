@@ -15,4 +15,12 @@ Arduino fortune teller, with real-world interaction metrics.
 1. Wire display, buttons, and switch.
 1. Create sample data.
 
+## Hardware
+- Wemos D1 Mini (Arduino)
+- LCD Display 20x4
+- Potentiometer, resister
+- Arcade buttons
+- Jumpers
+- Breadboard
+
 ### [Simple Starter](https://github.com/doublejosh/FortuneExample)
