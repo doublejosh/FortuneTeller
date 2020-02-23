@@ -378,9 +378,11 @@ void coin () {
 		paint(MESSAGES[GREET2], DELAY_QUICK_MSG);
 		play(APPEAR_FRAMES, 6);
 		paint(MESSAGES[GREET3], DELAY_QUICK_MSG);
+	} else {
+		txtToScreen("   A freebie, ok.   ", DELAY_QUICK_MSG, 1);
 	}
 	// Start question tree.
-	String next = "first";
+	String next = FIRST_QUESTION_ID;
 	askQuestion(next);
 }
 
