@@ -253,8 +253,6 @@ int8_t ask () {
 		// Accept the answer.
 		bool voteYes = (digitalRead(BTN2_PULLUP) == LOW);
 		if (voteYes || (digitalRead(BTN1_PULLUP) == LOW)) {
-			String answer = (voteYes) ? "You picked YES." : "You picked NO.";
-			txtToScreen(answer, 1);
 			return (voteYes) ? ANSWER_YES : ANSWER_NO;
 		}
 		delay(200);
@@ -311,7 +309,6 @@ void fetchFortune (const String category) {
 		// Ask for accuracy.
 		message(MESSAGES[ACCURATE]);
 		int result = ask();
-		String msg;
 		if (result == ANSWER_YES) {
 			message(MESSAGES[CORRECT]);
 			increaseCount(index[picker].c_str(), "votes");
@@ -320,7 +317,6 @@ void fetchFortune (const String category) {
 		} else {
 			message(MESSAGES[TIMEOUT]);
 		}
-		txtToScreen(msg, 1);
 
 		// Record interaction data.
 		unsigned int fortuneId = atoi(index[picker].c_str());
@@ -345,6 +341,7 @@ void askQuestion (String id) {
 		if (question.name == id) {
 			Serial.println(question.text);
 			if (!NOCHROME) play(APPEAR_FRAMES, 6);
+			// Print manually to avoid delay in txtToScreen.
 			lcd.clear();
 			lcd.setCursor(0, 0);
 			lcd.print(question.text);
@@ -363,8 +360,10 @@ void askQuestion (String id) {
 	int result = ask();
 	// Go to the next step.
 	if (result == ANSWER_YES) {
+		txtToScreen("You picked YES.", 1);
 		askQuestion(question.nextYes);
 	} else if (result == ANSWER_NO) {
+		txtToScreen("You picked NO.", 1);
 		askQuestion(question.nextNo);
 	} else {
 		message(MESSAGES[RANDOM]);
