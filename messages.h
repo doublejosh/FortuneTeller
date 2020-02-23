@@ -13,6 +13,9 @@
 #define WRONG 10
 #define TIMEOUT 11
 #define FETCHING 12
+#define FREEBIE 13
+#define PICK_YES 14
+#define PICK_NO 15
 
 char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"*                  *",
@@ -26,14 +29,14 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"*                  *"
 	}, {
 		"*                  *",
-		"     WiFi Error,   ",
-		"     restart.      ",
+		"     WiFi Error,    ",
+		"     restart.       ",
 		"*                  *"
 	}, {
-		"|-                -|",
-		"|--   Hello :)   --|",
-		"|---            ---|",
-		"|------------------|"
+		"                    ",
+		"       Hello :)     ",
+		"                    ",
+		"                    "
 	}, {
 		"*                  *",
 		"   Our meeting is   ",
@@ -50,10 +53,10 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"                    ",
 		"<<< NO      YES >>> "
 	}, {
-		"*                  *",
-		"    Random choice   ",
-		"       picked.      ",
-		"*                  *"
+		"   Random choice.   ",
+		"                    ",
+		"       _====_       ",
+		"   `\_( O..O )_/'   "
 	}, {
 		"                    ",
 		"  Was your fortune  ",
@@ -74,12 +77,27 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"       Hello?       ",
 		"                    ",
 		"    Another coin?   "
-}, {
-	  "!                  !",
-	  "    Calibrating     ",
+	}, {
+		"!                  !",
+		"    Calibrating     ",
 		"    your fortune.   ",
 		"!                  !"
-}};
+	}, {
+		"   A freebie, ok.   ",
+		"                    ",
+		"       _====_       ",
+		"   `\_( O..O )_/'   "
+	}, {
+		"                    ",
+		"   You picked YES.  ",
+		"                    ",
+		"                    "
+	}, {
+		"                    ",
+		"   You picked NO.   ",
+		"                    ",
+		"                    "
+	}};
 
 char FORTUNES[][HEIGHT][WIDTH+1] = {{
     "A hunch is just     ",

@@ -7,6 +7,24 @@
 #include "animation.h"
 #include "messages.h"
 
+uint8_t trigger, wifiTry = 0, sleepFrame = 0;
+uint32_t timer = 1;
+boolean offline = false;
+
+LiquidCrystal lcd(
+	displayRS, displayEN, displayD4,
+	displayD5, displayD6, displayD7
+);
+
+FirebaseData fbData;
+FirebaseJson fbJson;
+DynamicJsonDocument jsonDoc(JSON_DOC_BYTES);
+
+typedef struct {
+	unsigned int id;
+	String text;
+} Fortune;
+
 typedef struct {
 	uint8_t id;
 	String name;
@@ -14,26 +32,7 @@ typedef struct {
 	String nextNo;
 	String text;
 } Question;
-
-typedef struct {
-	unsigned int id;
-	String text;
-} Fortune;
-
-FirebaseData fbData;
-FirebaseJson fbJson;
-DynamicJsonDocument jsonDoc(JSON_DOC_BYTES);
 Question Q_LIST[QUESTION_LIST_LENGTH];
-uint8_t wifiTry = 0, sleepFrame = 0;
-uint32_t timer = 1;
-boolean offline = false;
-uint16_t trigger;
-
-LiquidCrystal lcd(
-	displayRS, displayEN, displayD4,
-	displayD5, displayD6, displayD7
-);
-
 
 // SCREEN...
 
@@ -172,8 +171,7 @@ Question getQuestion (uint8_t i, String name, String &key) {
  */
 void fetchQuestions () {
 	if (!NOCHROME) txtToScreen("Fetching questions.", DELAY_QUICK_MSG, 1);
-	String path = "/questions";
-	if (Firebase.getShallowData(fbData, path)) {
+	if (Firebase.getShallowData(fbData, QUESTION_PATH)) {
 
 		FirebaseJson json;
 		size_t lineCount = json.iteratorBegin(fbData.jsonString().c_str());
@@ -182,7 +180,7 @@ void fetchQuestions () {
 		for (size_t i = 0; i < lineCount; i++) {
 			json.iteratorGet(i, _type, _key, _val);
 			if (_val == "true") {
-				Question question = getQuestion(i, _key, path + "/" + _key);
+				Question question = getQuestion(i, _key, QUESTION_PATH + "/" + _key);
 				Q_LIST[i] = question;
 			}
 			yield();
@@ -197,7 +195,7 @@ void fetchQuestions () {
  */
 void increaseCount(String fortuneId, String field) {
 	int votes;
-	String path = "/fortunes/" + fortuneId + "/" + field;
+	String path = FORTUNES_PATH + "/" + fortuneId + "/" + field;
 	if (Firebase.getInt(fbData, path)) {
 		votes = fbData.intData();
 		Serial.print("Vote Count: ");
@@ -271,7 +269,7 @@ void saveInteraction (int fortune, String category, boolean accurate, String hea
 	fbJson.set("version", 1);
 
 	if (!NOCHROME) paint(MESSAGES[SAVE], DELAY_MSG);
-	if (Firebase.pushJSON(fbData, String("/interactions/"), fbJson)) {
+	if (Firebase.pushJSON(fbData, INTERACTIONS_PATH, fbJson)) {
 		Serial.println("SAVED");
 		if (!NOCHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
 	} else Serial.println("SAVE ERROR");
@@ -288,9 +286,8 @@ void fetchFortune (const String category) {
 	query.orderBy("category");
 	query.equalTo(category);
 	query.limitToFirst(10);
-	String path = "/fortunes";
 	String index[FORTUNE_INDEX_MAX];
-	if (Firebase.getJSON(fbData, path, query)) {
+	if (Firebase.getJSON(fbData, FORTUNES_PATH, query)) {
 		FirebaseJson &json = fbData.jsonObject();
 		String jsonStr;
 		json.toString(jsonStr, true);
@@ -354,10 +351,10 @@ void askQuestion (String id) {
 	int result = ask();
 	// Go to the next step.
 	if (result == ANSWER_YES) {
-		txtToScreen("You picked YES.", DELAY_QUICK_MSG, 1);
+		paint(MESSAGES[PICK_YES], DELAY_QUICK_MSG);
 		askQuestion(question.nextYes);
 	} else if (result == ANSWER_NO) {
-		txtToScreen("You picked NO.", DELAY_QUICK_MSG, 1);
+		paint(MESSAGES[PICK_NO], DELAY_QUICK_MSG);
 		askQuestion(question.nextNo);
 	} else {
 		paint(MESSAGES[RANDOM], DELAY_MSG);
@@ -379,7 +376,7 @@ void coin () {
 		play(APPEAR_FRAMES, 6);
 		paint(MESSAGES[GREET3], DELAY_QUICK_MSG);
 	} else {
-		txtToScreen("   A freebie, ok.   ", DELAY_QUICK_MSG, 1);
+		paint(MESSAGES[FREEBIE], DELAY_MSG);
 	}
 	// Start question tree.
 	String next = FIRST_QUESTION_ID;
