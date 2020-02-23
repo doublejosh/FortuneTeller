@@ -253,8 +253,8 @@ int8_t ask () {
 		// Accept the answer.
 		bool voteYes = (digitalRead(BTN2_PULLUP) == LOW);
 		if (voteYes || (digitalRead(BTN1_PULLUP) == LOW)) {
-			String answer = (voteYes) ? "YES" : "NO";
-			txtToScreen("Answered: " + answer, 1);
+			String answer = (voteYes) ? "You picked YES." : "You picked NO.";
+			txtToScreen(answer, 1);
 			return (voteYes) ? ANSWER_YES : ANSWER_NO;
 		}
 		delay(200);
@@ -313,12 +313,12 @@ void fetchFortune (const String category) {
 		int result = ask();
 		String msg;
 		if (result == ANSWER_YES) {
-			msg = "Oh good, thanks!";
+			message(MESSAGES[CORRECT]);
 			increaseCount(index[picker].c_str(), "votes");
 		} else if (result == ANSWER_NO) {
-			msg = "Ok, thanks. I'll remember that.";
+			message(MESSAGES[WRONG]);
 		} else {
-			msg = "Hello? Another coin?";
+			message(MESSAGES[TIMEOUT]);
 		}
 		txtToScreen(msg, 1);
 
@@ -340,8 +340,7 @@ void askQuestion (String id) {
 	// Grab data from cached global and show.
 	Question question;
 	bool questionFound = false;
-	uint8_t len = sizeof(Q_LIST) / sizeof(Q_LIST[0]);
-	for (uint8_t i = 0; i < len; i++) {
+	for (uint8_t i = 0; i < sizeof(Q_LIST) / sizeof(Q_LIST[0]); i++) {
 		question = Q_LIST[i];
 		if (question.name == id) {
 			Serial.println(question.text);
@@ -352,6 +351,7 @@ void askQuestion (String id) {
 			break;
 		}
 	}
+	// End of the question tree.
 	if (!questionFound) {
 		// @todo Get sensor reading.
 		fetchFortune(id);
@@ -359,38 +359,16 @@ void askQuestion (String id) {
 		return;
 	}
 
-	// Time boundary on question.
-	int seconds;
-	unsigned long startTime = millis(),
-				currentTime = millis();
-	while (currentTime - startTime <= QUESTION_TIMEOUT) {
-		currentTime = millis();
-		uint8_t seconds = (currentTime - startTime) / 1000;
-		lcd.setCursor(18, 3);
-		lcd.print("  ");
-		lcd.setCursor(18, 3);
-		lcd.print(String((QUESTION_TIMEOUT / 1000) - seconds));
-		// Accept the answer.
-		bool voteYes = (digitalRead(BTN2_PULLUP) == LOW);
-		if (voteYes || (digitalRead(BTN1_PULLUP) == LOW)) {
-			String answer = (voteYes) ? "YES" : "NO";
-			txtToScreen("Answered: " + answer, 1);
-			if (voteYes) {
-				Serial.println("Chosen: " + question.nextYes);
-				askQuestion(question.nextYes);
-				return;
-			}
-			else {
-				Serial.println("Chosen: " + question.nextNo);
-				askQuestion(question.nextNo);
-				return;
-			}
-		}
-		delay(200);
+	int result = ask();
+	// Go to the next step.
+	if (result == ANSWER_YES) {
+		askQuestion(question.nextYes);
+	} else if (result == ANSWER_NO) {
+		askQuestion(question.nextNo);
+	} else {
+		message(MESSAGES[RANDOM]);
+		askQuestion((random(9) % 2) ? question.nextYes : question.nextNo);
 	}
-	// Pick random vote.
-	message(MESSAGES[RANDOM]);
-	askQuestion((random(9) % 2) ? question.nextYes : question.nextNo);
 }
 
 /**

@@ -9,6 +9,9 @@
 #define GREET3 6
 #define RANDOM 7
 #define ACCURATE 8
+#define CORRECT 9
+#define WRONG 10
+#define TIMEOUT 11
 
 char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"*                  *",
@@ -55,7 +58,22 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"  Was your fortune  ",
 		"     on target?     ",
 		"                    "
-	}};
+	}, {
+		"                    ",
+		"  Oh good, thanks!  ",
+		"                    ",
+		" I'm remember that. "
+	}, {
+		"                    ",
+		"      Huh, ok.      ",
+		"                    ",
+		" I'm remember that. "
+	}, {
+		"                    ",
+		"       Hello?       ",
+		"                    ",
+		"    Another coin?   "
+}};
 
 char FORTUNES[][HEIGHT][WIDTH+1] = {{
     "A hunch is just     ",
