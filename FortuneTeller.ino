@@ -71,23 +71,6 @@ void txtToScreen (String msg, int wait, int row) {
 	delay(wait);
 
 	// @todo Pretty fortune rendering.
-
-	// const char* arr = {};
-	// //char* buffer[WIDTH+1] = {};
-	// for (uint8_t i=0; i<HEIGHT; i++) {
-	// 	String slice = msg.substring(i*WIDTH, (i*WIDTH)+WIDTH);
-	// 	arr = slice.c_str();
-	// 	for (uint8_t c=0; c<WIDTH; c++) {
-	// 		screen[i][c] = arr[c];
-	// 		// slice += "\0";
-	// 		// buffer = slice.c_str(WIDTH);
-	// 		//slice.toCharArray(buffer, WIDTH);
-	// 		//screen[i] = slice.c_str();
-	// 		//Serial.println(sizeof(screen[i]));
-	// 	}
-	// 	arr = "";
-	// }
-	// paint(screen, DELAY_MSG);
 }
 
 /**
@@ -339,9 +322,9 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
 }
 
 /**
- * Get the questioned requested from cache.
- * Display and provide time to answer.
+ * Get the question from stash.
  * Handle end of question tree.
+ * Display and handle answer.
  */
 void askQuestion (String id, unsigned int version) {
 	if (!NOCHROME) play(APPEAR_FRAMES, 6);
