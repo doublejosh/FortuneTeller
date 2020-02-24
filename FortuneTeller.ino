@@ -18,7 +18,6 @@ LiquidCrystal lcd(
 );
 
 FirebaseData fbData;
-FirebaseJson fbJson;
 DynamicJsonDocument jsonDoc(JSON_DOC_BYTES);
 
 typedef struct {
@@ -178,6 +177,7 @@ void fetchQuestions () {
 		json.iteratorEnd();
 	}
 	else printDebug(fbData.errorReason());
+	fbData.clear();
 }
 
 /**
@@ -194,6 +194,7 @@ void increaseMetric(String fortuneId, String field) {
 			printDebug("Updated " + field + ".");
 		} else printDebug(fbData.errorReason());
 	} else printDebug(fbData.errorReason());
+	fbData.clear();
 }
 
 /**
@@ -253,7 +254,7 @@ JsonObject buildFortuneIndex(String jsonStr, String index[]) {
  */
 void saveInteraction (int fortune, String category, int accurate, double sensor, int version, bool random) {
 	printDebug("SAVING...");
-	fbJson.clear();
+	FirebaseJson fbJson;
 	fbJson.set(FIELD_FORTUNE_ID, fortune);
 	fbJson.set(FIELD_CATEGORY, category);
 	fbJson.set(FIELD_ACCURATE, accurate);
@@ -268,6 +269,7 @@ void saveInteraction (int fortune, String category, int accurate, double sensor,
 		printDebug("Ready.");
 		if (!NOCHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
 	} else printDebug("SAVE ERROR");
+	fbJson.clear();
 }
 
 /**
@@ -279,9 +281,9 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
 	printDebug("Fortune category: " + category);
 	// Fetch relevant fortunes.
 	QueryFilter query;
-	query.orderBy("category"); // FIELD_CATEGORY
+	query.orderBy(FIELD_CATEGORY);
 	query.equalTo(category);
-	query.limitToFirst(10); // FORTUNE_GET_MAX
+	query.limitToFirst(FORTUNE_GET_MAX);
 	String index[FORTUNE_INDEX_MAX];
 	if (Firebase.getJSON(fbData, FORTUNES_PATH, query)) {
 		// Create string.
@@ -316,9 +318,8 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
 
 		// Record interaction data.
 		saveInteraction(atoi(fortuneId.c_str()), category, result, sensor, version, randomChoice);
-		fbData.clear();
-
 	} else printDebug(fbData.errorReason());
+	fbData.clear();
 }
 
 /**
@@ -431,7 +432,7 @@ void setup (void) {
 
 	if (connect()) {
 		if (TESTING) {
-			printDebug("Running fortune tests.");
+			printDebug("Running fortune tests...");
 			fetchFortune ("heart", 123.00, 2, FAST_TIMEOUT);
 			fetchFortune ("fate", 123.00, 2, FAST_TIMEOUT);
 			fetchFortune ("health", 123.00, 2, FAST_TIMEOUT);
