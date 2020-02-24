@@ -14,8 +14,8 @@ Arduino fortune teller, with real-world interaction metrics.
 1. Create a Firebase project with a database.
 1. Rename `configs.txt` to `configs.h` and add credentials.
 1. Wire display, buttons, and switch.
-1. Create sample data.
-1. Update `FIREBASE_RESPONSE_SIZE` in `Firebase_ESP8266_Client`.
+1. Create sample data, see structure in configs.
+1. Boost `FIREBASE_RESPONSE_SIZE` in `Firebase_ESP8266_Client/src/FirebaseESP8266.h`
 
 ## Hardware
 - Wemos D1 Mini (Arduino)

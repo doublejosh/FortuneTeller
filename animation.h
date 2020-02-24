@@ -17,7 +17,7 @@ char SLEEP_FRAMES[][HEIGHT][WIDTH+1] = {{
 		"       _====_       ",
 		"     8( u.,u )8     "
 	}, {
-		"COIN    zZz      PLZ",
+		"COIN     zZz     PLZ",
 		"                    ",
 		"       _====_       ",
 		"     8( u.;u )8     "
@@ -149,5 +149,5 @@ char APPEAR_FRAMES[][HEIGHT][WIDTH+1] = {{
 		"                    ",
 		"                    ",
 		"       _====_       ",
-		"   q 8( O..- )8 p   "
+		"  q  8( O..- )8  p  "
   }};

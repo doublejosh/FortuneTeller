@@ -34,7 +34,7 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"*                  *"
 	}, {
 		"                    ",
-		"       Hello :)     ",
+		"      Hello :)      ",
 		"                    ",
 		"                    "
 	}, {
@@ -56,7 +56,7 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"   Random choice.   ",
 		"                    ",
 		"       _====_       ",
-		"   `\_( O..O )_/'   "
+		"  q  8( 0..0 )8  p  "
 	}, {
 		"                    ",
 		"  Was your fortune  ",
@@ -83,10 +83,10 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"    your fortune.   ",
 		"!                  !"
 	}, {
-		"   A freebie, ok.   ",
+		"   A freebie!? OK   ",
 		"                    ",
 		"       _====_       ",
-		"   `\_( O..O )_/'   "
+		"  q  8( 0..0 )8  p  "
 	}, {
 		"                    ",
 		"   You picked YES.  ",
@@ -96,32 +96,5 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"                    ",
 		"   You picked NO.   ",
 		"                    ",
-		"                    "
-	}};
-
-char FORTUNES[][HEIGHT][WIDTH+1] = {{
-    "A hunch is just     ",
-    "creativity trying to",
-    "tell you something. ",
-		"                    "
-  }, {
-		"A soft voice may be ",
-		"awfully persuasive. ",
-		"                    ",
-		"                    "
-  	}, {
-		"Adventure can be    ",
-		"real happiness.     ",
-		"                    ",
-		"                    "
-	}, {
-		"At the touch of love",
-		"everyone becomes a  ",
-		"poet.               ",
-		"                    "
-	}, {
-		"A friend is a       ",
-		"present you give    ",
-		"yourself.           ",
 		"                    "
 	}};

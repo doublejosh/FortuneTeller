@@ -4,7 +4,7 @@
 /**
  * Simple text output (refactor in progress).
  **/
-void print (String msg) {
+void printDebug (String msg) {
     if (DEBUG) {
         Serial.println(msg);
     }
