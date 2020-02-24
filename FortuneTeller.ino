@@ -118,6 +118,8 @@ bool connect (void) {
 		Firebase.reconnectWiFi(true);
 		Firebase.setReadTimeout(fbData, READ_TIMEOUT);
 		Firebase.setMaxRetry(fbData, FIREBASE_MAX_TRY);
+		fbData.setBSSLBufferSize(2048, 2048);
+		fbData.setResponseSize(2048);
 		return true;
 	}
 }

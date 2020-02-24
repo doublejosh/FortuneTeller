@@ -28,7 +28,7 @@ Arduino fortune teller, with real-world interaction metrics.
 - Breadboard
 
 ## Dependencies
-- [Firebase-ESP8266](https://github.com/mobizt/Firebase-ESP8266)
+- [Firebase-ESP8266](https://github.com/mobizt/Firebase-ESP8266) (2.8.0)
 - [LiquidCrystal](https://www.arduino.cc/en/Reference/LiquidCrystal)
 - [ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi)
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
