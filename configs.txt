@@ -46,8 +46,8 @@ char* FIELD_RANDOM     = "random";
 
 // SETTINGS...
 
-bool NOCHROME = true;
-bool FREEPLAY = true;
+bool CHROME = true;
+bool FREEPLAY = false;
 
 #define FORTUNE_INDEX_MAX 50
 #define FORTUNE_GET_MAX 15
@@ -67,7 +67,8 @@ uint16_t DELAY_NONE = 0,
        READ_TIMEOUT = 20000,
    WIFI_RETRY_DELAY = 3000;
 
-#define DEBUG true
-#define TESTING true
+#define DEBUG false
+#define TESTING false
 #define FIREBASE_MAX_TRY 3
+#define FIREBASE_BUFFER_SZE 2048
 #define JSON_DOC_BYTES 2048
