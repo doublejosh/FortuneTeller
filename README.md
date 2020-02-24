@@ -15,7 +15,6 @@ Arduino fortune teller, with real-world interaction metrics.
 1. Rename `configs.txt` to `configs.h` and add credentials.
 1. Wire display, buttons, and switch.
 1. Create sample data, see structure in configs.
-1. Boost `FIREBASE_RESPONSE_SIZE` in `Firebase_ESP8266_Client/src/FirebaseESP8266.h`
 
 ### [Simple Starter](https://github.com/doublejosh/FortuneExample)
 
