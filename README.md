@@ -17,6 +17,8 @@ Arduino fortune teller, with real-world interaction metrics.
 1. Create sample data, see structure in configs.
 1. Boost `FIREBASE_RESPONSE_SIZE` in `Firebase_ESP8266_Client/src/FirebaseESP8266.h`
 
+### [Simple Starter](https://github.com/doublejosh/FortuneExample)
+
 ## Hardware
 - Wemos D1 Mini (Arduino)
 - LCD Display 20x4
@@ -25,4 +27,8 @@ Arduino fortune teller, with real-world interaction metrics.
 - Jumpers
 - Breadboard
 
-### [Simple Starter](https://github.com/doublejosh/FortuneExample)
+## Dependencies
+- [Firebase-ESP8266](https://github.com/mobizt/Firebase-ESP8266)
+- [LiquidCrystal](https://www.arduino.cc/en/Reference/LiquidCrystal)
+- [ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi)
+- [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
