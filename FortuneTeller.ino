@@ -419,7 +419,7 @@ void setup (void) {
 
 	// On-the-fly alternate modes.
 	if (digitalRead(BTN1_PULLUP) == LOW) {
-		CHROME = true;
+		CHROME = false;
 	}
 	if (digitalRead(BTN2_PULLUP) == LOW) {
 		FREEPLAY = true;

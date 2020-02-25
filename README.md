@@ -9,6 +9,8 @@ Arduino fortune teller, with real-world interaction metrics.
 - Coin slot trigger
 - Boot modes: free play, "no chrome" quick interactions
 
+### [Pics in the wiki](https://github.com/doublejosh/FortuneTeller/wiki)
+
 ## Build Your Own
 1. Clone the code and upload to Arduino.
 1. Create a Firebase project with a database.
