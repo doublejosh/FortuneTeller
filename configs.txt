@@ -44,6 +44,8 @@ char* FIELD_VERSION    = "version";
 char* FIELD_SENSOR     = "sensor";
 char* FIELD_RANDOM     = "random";
 
+String MACHINE_ID = "homegame";
+
 // SETTINGS...
 
 bool CHROME = true;

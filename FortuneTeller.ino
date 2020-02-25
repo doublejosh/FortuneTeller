@@ -65,11 +65,8 @@ void play (char frames[][HEIGHT][WIDTH+1], uint8_t count) {
  */
 void txtToScreen (String msg, int wait, int row) {
 	lcd.clear();
-	lcd.setCursor(0, row);
-	lcd.print(msg);
+	wrapTxtToScreen(lcd, msg);
 	delay(wait);
-
-	// @todo Pretty fortune rendering.
 }
 
 /**
@@ -192,9 +189,11 @@ void increaseMetric(String fortuneId, String field) {
 		metric = fbData.intData();
 		printDebug("Count " + field + ": " + metric);
 		// Update value.
-		if (Firebase.setInt(fbData, path, metric+1)) {
-			printDebug("Updated " + field + ".");
-		} else printDebug(fbData.errorReason());
+		if (!TESTING) {
+			if (Firebase.setInt(fbData, path, metric+1)) {
+				printDebug("Updated " + field + ".");
+			} else printDebug(fbData.errorReason());
+		} else printDebug("Skipped increase for testing mode.")
 	} else printDebug(fbData.errorReason());
 	fbData.clear();
 }
@@ -221,6 +220,8 @@ int8_t ask (uint16_t timeout) {
 		if (voteYes || (digitalRead(BTN1_PULLUP) == LOW)) {
 			return (voteYes) ? ANSWER_YES : ANSWER_NO;
 		}
+		// @todo Use interrupts button listening.
+		https://github.com/doublejosh/FortuneTeller/issues/1
 		// Keep the ESP watchdog happy (avoid soft reset).
 		delay(200);
 	}
@@ -263,14 +264,21 @@ void saveInteraction (int fortune, String category, int accurate, double sensor,
 	fbJson.set(FIELD_SENSOR, sensor);
 	fbJson.set(FIELD_VERSION, version);
 	fbJson.set(FIELD_RANDOM, random);
-
-	// @todo Save the timestamp.
+	fbJson.set(FIELD_MACHINE, MACHINE_ID);
 
 	if (CHROME) paint(MESSAGES[SAVE], DELAY_MSG);
-	if (Firebase.pushJSON(fbData, INTERACTIONS_PATH, fbJson)) {
-		printDebug("Ready.");
-		if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
-	} else printDebug("SAVE ERROR");
+	if (!TESTING) {
+		if (Firebase.pushJSON(fbData, INTERACTIONS_PATH, fbJson)) {
+			// @todo Save the timestamp.
+			// https://github.com/doublejosh/FortuneTeller/issues/2
+			//pushTimestamp(fbData, const String &path);
+			printDebug("Ready.");
+			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
+		} else printDebug("SAVE ERROR");
+	} else {
+		printDebug("Save skipped for testing.");
+	}
+
 	fbJson.clear();
 }
 
@@ -317,6 +325,10 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
 		} else {
 			paint(MESSAGES[TIMEOUT], DELAY_MSG);
 		}
+
+    time_t my_time = time(NULL); 
+    // ctime() used to give the present time 
+    printf("%s", ctime(&my_time));
 
 		// Record interaction data.
 		saveInteraction(atoi(fortuneId.c_str()), category, result, sensor, version, randomChoice);
@@ -446,6 +458,8 @@ void setup (void) {
 }
 
 void loop (void) {
+	// @todo Use interrupts for coin trigger listening.
+	// https://github.com/doublejosh/FortuneTeller/issues/1
 	trigger = digitalRead(TRIGGER_PIN);
 	if (trigger == HIGH || (FREEPLAY && digitalRead(BTN2_PULLUP) == LOW)) {
 		coin();

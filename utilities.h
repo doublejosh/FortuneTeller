@@ -1,6 +1,5 @@
 #include "configs.h"
 
-
 /**
  * Simple text output (refactor in progress).
  **/
@@ -9,6 +8,38 @@ void printDebug (String msg) {
         Serial.println(msg);
     }
 }
+
+/**
+ * Wrap text to display, clearly pasted from StackOverflow :)
+ */
+
+void wrapTxtToScreen (LiquidCrystal &lcd, String msg) {
+  	byte offset = 0, charNum = 0, dataLength = strlen(msg.c_str());
+
+  	if (dataLength > WIDTH * HEIGHT) {
+		dataLength = WIDTH * HEIGHT + 3;
+	}
+	for (byte rowNum = 0; rowNum < HEIGHT; rowNum++) {
+		lcd.setCursor(0, rowNum);
+		charNum = rowNum * WIDTH + offset;
+		while (charNum < ((rowNum + 1) *WIDTH) + offset) {
+			if ((charNum - offset == rowNum * WIDTH) && (charNum < dataLength-offset) && (msg[charNum] == ' ')) {
+				charNum++;
+				offset++;
+			}
+			if (charNum - offset >= dataLength-offset) {
+				lcd.write(254);
+			}
+			//if (charNum-offset >= dataLength-offset) {
+			// 	lcd.print("x");
+			// }
+			else if (charNum - offset < dataLength-offset) {
+				lcd.print(msg[charNum]);
+			}
+			charNum++;
+		}
+	}
+};
 
 /**
  * Debug Firebase client data objects.
