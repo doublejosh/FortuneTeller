@@ -48,7 +48,7 @@ char MESSAGES[][HEIGHT][WIDTH+1] = {{
 		"    now adjusted.   ",
 		"*                  *"
 	}, {
-		"   Use buttons to   ",
+		"*  Use buttons to  *",
 		"  answer questions. ",
 		"                    ",
 		"<<< NO      YES >>> "

@@ -193,7 +193,7 @@ void increaseMetric(String fortuneId, String field) {
 			if (Firebase.setInt(fbData, path, metric+1)) {
 				printDebug("Updated " + field + ".");
 			} else printDebug(fbData.errorReason());
-		} else printDebug("Skipped increase for testing mode.")
+		} else printDebug("Skipped increase for testing mode.");
 	} else printDebug(fbData.errorReason());
 	fbData.clear();
 }
