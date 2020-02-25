@@ -330,7 +330,6 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
  * Display and handle answer.
  */
 void askQuestion (String id, unsigned int version) {
-	if (CHROME) play(APPEAR_FRAMES, 6);
 	// Grab data from cached global and show.
 	Question question;
 	bool questionFound = false;
@@ -420,7 +419,7 @@ void setup (void) {
 
 	// On-the-fly alternate modes.
 	if (digitalRead(BTN1_PULLUP) == LOW) {
-		NOCHROME = true;
+		CHROME = true;
 	}
 	if (digitalRead(BTN2_PULLUP) == LOW) {
 		FREEPLAY = true;
