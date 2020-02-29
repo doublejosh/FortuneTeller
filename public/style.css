@@ -85,11 +85,7 @@ h1 {
     right: 0;
     top: 0;
     height: 100%;
-    background: linear-gradient(
-        90deg,
-        rgb(36, 58, 158, 0.5) 0%,
-        rgb(36, 58, 158) 100%
-    );
+    background: linear-gradient(90deg, rgb(36, 58, 158, 0.5) 0%, rgb(36, 58, 158) 100%);
     text-align: right;
     font-weight: bold;
     display: flex;
@@ -99,6 +95,7 @@ h1 {
 }
 .score-badge.low-score {
     color: rgba(255, 255, 255, 0.3);
+    background: none;
 }
 #load {
     color: rgb(52, 75, 180);

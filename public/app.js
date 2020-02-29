@@ -70,7 +70,6 @@
                     if (f.score > 10) {
                         scoreBadge.style.width = f.score * multiplier + 'px';
                     } else {
-                        scoreBadge.style.width = minWidth + 'px';
                         scoreBadge.classList.add('low-score');
                     }
                     scoreBadge.classList.add('score-badge');
