@@ -1,0 +1,9 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": false,
+    "fortunes": {
+      ".indexOn": ["category", "votes"]
+    }
+  }
+}
