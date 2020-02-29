@@ -1,0 +1,141 @@
+html {
+    font-size: 16px;
+}
+body {
+    background: rgb(52, 75, 180);
+    color: #ddd;
+    /* font-family: Roboto, Helvetica, Arial, sans-serif; */
+    font-family: 'VT323';
+    margin: 0;
+    padding: 0;
+}
+#wrapper {
+    width: 94%;
+    max-width: 800px;
+    margin: 30px auto;
+}
+.logo {
+    position: relative;
+    min-height: 10rem;
+    margin: 8rem 2rem;
+}
+h1 {
+    font-size: 3rem;
+    font-weight: 300;
+    margin: 0;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.4);
+}
+.logo h1:nth-child(1) {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.logo h1:nth-child(2) {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    color: rgba(0, 0, 0, 0.7);
+}
+.logo h1:nth-child(3) {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    color: #fff;
+}
+.fortunes .category {
+    margin-bottom: 1rem;
+}
+.fortunes,
+.fortunes li {
+    list-style-type: none;
+    margin-bottom: 0.5rem;
+}
+.fortunes ul {
+    padding-left: 0;
+    margin-top: 0.5rem;
+}
+.fortunes li {
+    padding: 0.5rem 0 0.5rem 0.5rem;
+    margin-bottom: 0.75rem;
+    box-shadow: -3px 3px 0px rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+.fortunes h3 {
+    font-size: 1.75rem;
+    font-weight: normal;
+    color: #000;
+    padding: 0 0 1rem 3.5rem;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: contain;
+}
+.fortunes p {
+    margin: 0;
+    padding-right: 135px;
+}
+.count-badge {
+    text-align: right;
+    margin-right: 0.5rem;
+}
+.score-badge {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, rgb(36, 58, 158, 0.5) 0%, rgb(36, 58, 158) 100%);
+    text-align: right;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 1rem;
+}
+.score-badge.low-score {
+    color: rgba(255, 255, 255, 0.3);
+    background: none;
+}
+#load {
+    color: rgb(52, 75, 180);
+    text-align: center;
+    font-size: 13px;
+}
+.fortunes .heart h3 {
+    background-image: url('img/heart.svg');
+}
+.fortunes .fortune h3 {
+    background-image: url('img/diamond.svg');
+}
+.fortunes .health h3 {
+    background-image: url('img/skull.svg');
+}
+.fortunes .self h3 {
+    background-image: url('img/eye.svg');
+}
+.fortunes .self h3 {
+    background-image: url('img/eye.svg');
+}
+.fortunes .wave h3 {
+    background-image: url('img/wave.svg');
+}
+@media (min-width: 600px) {
+    html {
+        font-size: 22px;
+    }
+    .logo {
+        min-height: 5rem;
+        margin: 2rem 0;
+    }
+    .fortunes li {
+        padding: 0.75rem 0 0.75rem 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .fortunes p {
+        padding-right: 235px;
+    }
+    .fortunes h3 {
+        padding-left: 4rem;
+    }
+}
