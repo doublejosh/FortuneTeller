@@ -2,15 +2,15 @@
     const categories = [
         {
             id: 'heart',
-            label: 'Matters of the Heart',
+            label: 'Matter of the Heart',
         },
         {
             id: 'fortune',
-            label: 'Fortune and Fame',
+            label: 'Fortune & Fame',
         },
         {
             id: 'health',
-            label: 'Health and Wellbeing',
+            label: 'Health & Wellbeing',
         },
         {
             id: 'wave',
@@ -18,7 +18,7 @@
         },
         {
             id: 'self',
-            label: 'Fate is Made by You',
+            label: 'Fate is What You Make',
         },
     ];
 
@@ -32,67 +32,68 @@
         return Math.round((parseInt(votes) / parseInt(shown)) * 100);
     }
 
+    function useData(data) {
+        const fortunes = data.val(),
+            index = Object.keys(fortunes);
+        wrapper = doc.querySelector('.fortunes');
+
+        fortunes.forEach((fortune, i) => {
+            fortunes[i].score = getScore(fortune.votes, fortune.shown);
+        });
+        fortunes.sort((a, b) => b.score - a.score);
+
+        categories.map((category, i) => {
+            let catWrap = doc.createElement('div'),
+                header = doc.createElement('h3'),
+                total = 0;
+
+            catWrap.classList.add('category');
+            catWrap.classList.add(category.id);
+            header.innerHTML = category.label;
+            catWrap.appendChild(header);
+
+            let list = doc.createElement('ul');
+            fortunes
+                .filter(fortune => fortune.category === category.id)
+                .forEach(f => {
+                    let fortuneCard = doc.createElement('li'),
+                        scoreBadge = doc.createElement('div'),
+                        summary = doc.createElement('p');
+
+                    total += f.shown;
+
+                    summary.innerHTML = f.text + ' (' + f.shown + ')';
+                    fortuneCard.appendChild(summary);
+
+                    const multiplier = isDesktop() ? 2 : 1;
+                    const minWidth = isDesktop() ? 20 : 10;
+                    if (f.score > 10) {
+                        scoreBadge.style.width = f.score * multiplier + 'px';
+                    } else {
+                        scoreBadge.style.width = minWidth + 'px';
+                        scoreBadge.classList.add('low-score');
+                    }
+                    scoreBadge.classList.add('score-badge');
+                    scoreBadge.innerHTML = f.score + '%';
+
+                    fortuneCard.appendChild(scoreBadge);
+                    list.appendChild(fortuneCard);
+                });
+            catWrap.appendChild(list);
+
+            let count = doc.createElement('div');
+            count.classList.add('count-badge');
+            count.innerHTML = 'Shown: ' + total;
+            catWrap.appendChild(count);
+
+            wrapper.appendChild(catWrap);
+        });
+    }
+
     function showResults(database) {
         database()
             .ref('/fortunes')
-            .on('value', function(data) {
-                const fortunes = data.val(),
-                    index = Object.keys(fortunes);
-                wrapper = doc.querySelector('.fortunes');
-
-                fortunes.forEach((fortune, i) => {
-                    fortunes[i].score = getScore(fortune.votes, fortune.shown);
-                });
-                fortunes.sort((a, b) => b.score - a.score);
-
-                categories.map((category, i) => {
-                    let catWrap = doc.createElement('div'),
-                        header = doc.createElement('h3'),
-                        total = 0;
-
-                    catWrap.classList.add('category');
-                    catWrap.classList.add(category.id);
-                    header.innerHTML = category.label;
-                    catWrap.appendChild(header);
-
-                    let list = doc.createElement('ul');
-                    fortunes
-                        .filter(fortune => fortune.category === category.id)
-                        .forEach(f => {
-                            let fortuneCard = doc.createElement('li'),
-                                scoreBadge = doc.createElement('div'),
-                                summary = doc.createElement('p');
-
-                            total += f.shown;
-
-                            summary.innerHTML = f.text + ' (' + f.shown + ')';
-                            fortuneCard.appendChild(summary);
-
-                            const multiplier = isDesktop() ? 2 : 1;
-                            const minWidth = isDesktop() ? 20 : 10;
-                            if (f.score > 10) {
-                                scoreBadge.style.width =
-                                    f.score * multiplier + 'px';
-                            } else {
-                                scoreBadge.style.width = minWidth + 'px';
-                                scoreBadge.classList.add('low-score');
-                            }
-                            scoreBadge.classList.add('score-badge');
-                            scoreBadge.innerHTML = f.score + '%';
-
-                            fortuneCard.appendChild(scoreBadge);
-                            list.appendChild(fortuneCard);
-                        });
-                    catWrap.appendChild(list);
-
-                    let count = doc.createElement('div');
-                    count.classList.add('count-badge');
-                    count.innerHTML = 'Shown: ' + total;
-                    catWrap.appendChild(count);
-
-                    wrapper.appendChild(catWrap);
-                });
-            });
+            .on('value', useData);
     }
 
     doc.addEventListener('DOMContentLoaded', function() {
