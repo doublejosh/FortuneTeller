@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
     <head>
         <meta charset="utf-8" />
         <title>FORTUNE Calibrator</title>
@@ -19,11 +19,25 @@
             name="viewport"
             content="minimal-ui, width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
         />
-        <link href="https://fonts.googleapis.com/css?family=VT323&display=swap" rel="stylesheet" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script defer src="/__/firebase/7.5.2/firebase-app.js"></script>
+        <script defer src="/__/firebase/7.5.2/firebase-database.js"></script>
+        <script defer src="/__/firebase/init.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <link
+            href="https://fonts.googleapis.com/css?family=VT323&display=swap"
+            rel="stylesheet"
+        />
     </head>
-    <body id="page-top">
-        <noscript>You need to enable JavaScript to run this app.</noscript>
-        <div id="root"></div>
+    <body>
+        <div id="wrapper">
+            <section class="logo">
+                <h1>FORTUNE Calibrator</h1>
+                <h1>FORTUNE Calibrator</h1>
+                <h1>FORTUNE Calibrator</h1>
+            </section>
+            <div class="fortunes"></div>
+        </div>
+        <p id="load">Loading&hellip;</p>
+        <script src="/app.js"></script>
     </body>
 </html>
