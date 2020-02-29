@@ -4,8 +4,10 @@
 	"private": false,
 	"homepage": "https://fortunecalibrator.firebaseapp.com",
 	"scripts": {
-		"deploy": "firebase build",
-		"start": "react-scripts start"
+		"start": "react-scripts start",
+		"build": "react-scripts build",
+		"predeploy": "npm run build",
+		"deploy": "firebase deploy"
 	},
 	"browserslist": {
 		"production": [
