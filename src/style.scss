@@ -1,148 +1,158 @@
 html {
-    font-size: 16px;
+	font-size: 16px;
+
+	@media (min-width: 600px) {
+		font-size: 22px;
+	}
 }
 body {
-    background: rgb(52, 75, 180);
-    color: #ddd;
-    /* font-family: Roboto, Helvetica, Arial, sans-serif; */
-    font-family: 'VT323';
-    margin: 0;
-    padding: 0;
+	background: rgb(52, 75, 180);
+	color: #ddd;
+	/* font-family: Roboto, Helvetica, Arial, sans-serif; */
+	font-family: 'VT323';
+	margin: 0;
+	padding: 0;
 }
 #root {
-    width: 94%;
-    max-width: 800px;
-    margin: 30px auto;
+	width: 94%;
+	max-width: 800px;
+	margin: 30px auto;
 }
 .logo {
-    position: relative;
-    min-height: 10rem;
-    margin: 8rem 2rem;
+	position: relative;
+	min-height: 10rem;
+	margin: 8rem 2rem;
 
-    h1:nth-child(1) {
-        position: absolute;
-        top: 0;
-        left: 0;
-    }
-    h1:nth-child(2) {
-        position: absolute;
-        top: -5px;
-        left: -5px;
-        color: rgba(0, 0, 0, 0.7);
-    }
-    h1:nth-child(3) {
-        position: absolute;
-        top: -10px;
-        left: -10px;
-        color: #fff;
-    }
+	@media (min-width: 600px) {
+		min-height: 5rem;
+		margin: 2rem 0;
+	}
+
+	h1:nth-child(1) {
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	h1:nth-child(2) {
+		position: absolute;
+		top: -5px;
+		left: -5px;
+		color: rgba(0, 0, 0, 0.7);
+	}
+	h1:nth-child(3) {
+		position: absolute;
+		top: -10px;
+		left: -10px;
+		color: #fff;
+	}
 }
 h1 {
-    font-size: 3rem;
-    font-weight: 300;
-    margin: 0;
-    text-align: center;
-    color: rgba(0, 0, 0, 0.4);
-}
-.fortunes {
-    .category {
-        margin-bottom: 1rem;
-
-        &.heart h3 {
-            background-image: url('./static/img/heart.svg');
-        }
-        &.fortune h3 {
-            background-image: url('./static/img/diamond.svg');
-        }
-        &.health h3 {
-            background-image: url('./static/img/skull.svg');
-        }
-        &.self h3 {
-            background-image: url('./static/img/eye.svg');
-        }
-        &.self h3 {
-            background-image: url('./static/img/eye.svg');
-        }
-        &.wave h3 {
-            background-image: url('./static/img/wave.svg');
-        }
-
-        .count-badge {
-            text-align: right;
-            margin-right: 0.5rem;
-        }
-    }
-
-    ul {
-        padding-left: 0;
-        margin-top: 0.5rem;
-
-        li {
-            padding: 0.5rem 0 0.5rem 0.5rem;
-            margin-bottom: 0.75rem;
-            box-shadow: -3px 3px 0px rgba(0, 0, 0, 0.4);
-            background: rgba(255, 255, 255, 0.1);
-            position: relative;
-            list-style-type: none;
-            margin-bottom: 0.5rem;
-
-            .score-badge {
-                position: absolute;
-                right: 0;
-                top: 0;
-                height: 100%;
-                background: linear-gradient(
-                    90deg,
-                    rgba(36, 58, 158, 0.5) 0%,
-                    rgb(36, 58, 158) 100%
-                );
-                text-align: right;
-                font-weight: bold;
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
-                padding: 0 1rem;
-            }
-            .score-badge.low-score {
-                color: rgba(255, 255, 255, 0.3);
-                background: none;
-            }
-        }
-    }
-
-    h3 {
-        font-size: 1.75rem;
-        font-weight: normal;
-        color: #000;
-        padding: 0 0 1rem 3.5rem;
-        margin: 0;
-        background-repeat: no-repeat;
-        background-position: left bottom;
-        background-size: contain;
-    }
-
-    p {
-        margin: 0;
-        padding-right: 135px;
-    }
+	font-size: 3rem;
+	font-weight: 300;
+	margin: 0;
+	text-align: center;
+	color: rgba(0, 0, 0, 0.4);
 }
 
-@media (min-width: 600px) {
-    html {
-        font-size: 22px;
-    }
-    .logo {
-        min-height: 5rem;
-        margin: 2rem 0;
-    }
-    .fortunes li {
-        padding: 0.75rem 0 0.75rem 0.75rem;
-        margin-bottom: 1rem;
-    }
-    .fortunes p {
-        padding-right: 235px;
-    }
-    .fortunes h3 {
-        padding-left: 4rem;
-    }
+.category {
+	margin-bottom: 1rem;
+
+	h3 {
+		font-size: 1.75rem;
+		font-weight: normal;
+		color: #000;
+		padding: 0 0 1rem 3.5rem;
+		margin: 0;
+		background-repeat: no-repeat;
+		background-position: left bottom;
+		background-size: contain;
+
+		@media (min-width: 600px) {
+			padding-left: 3rem;
+		}
+	}
+
+	&.heart h3 {
+		background-image: url('./static/img/heart.svg');
+	}
+	&.fortune h3 {
+		background-image: url('./static/img/diamond.svg');
+	}
+	&.health h3 {
+		background-image: url('./static/img/skull.svg');
+	}
+	&.self h3 {
+		background-image: url('./static/img/eye.svg');
+	}
+	&.self h3 {
+		background-image: url('./static/img/eye.svg');
+	}
+	&.wave h3 {
+		background-image: url('./static/img/wave.svg');
+	}
+	.count-badge {
+		text-align: right;
+		margin-right: 0.5rem;
+	}
+
+	ul {
+		padding-left: 0;
+		margin: 0;
+
+		li {
+			padding: 0.5rem 0 0.5rem 0.5rem;
+			margin-bottom: 0.75rem;
+			box-shadow: -3px 3px 0px rgba(0, 0, 0, 0.4);
+			background: rgba(255, 255, 255, 0.1);
+			position: relative;
+			list-style-type: none;
+			margin-bottom: 0.5rem;
+
+			@media (min-width: 600px) {
+				padding: 0.75rem 0 0.75rem 0.75rem;
+				margin-bottom: 1rem;
+			}
+
+			p {
+				position: relative;
+				z-index: 10;
+				margin: 0;
+				font-size: 1.25rem;
+				padding-right: 4rem;
+				@media (min-width: 600px) {
+					padding-right: 235px;
+				}
+			}
+			.data {
+				margin-top: 0.5rem;
+				font-size: 0.75rem;
+				font-weight: 100;
+				color: #000;
+			}
+
+			.score-badge {
+				position: absolute;
+				font-size: 1.25rem;
+				color: #000;
+				right: 0;
+				top: 0;
+				height: 100%;
+				background: linear-gradient(
+					90deg,
+					rgba(36, 58, 158, 0.5) 0%,
+					rgb(36, 58, 158) 100%
+				);
+				text-align: right;
+				font-weight: bold;
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				padding: 0 1rem;
+			}
+			.score-badge.low-score {
+				color: rgba(0, 0, 0, 0.3);
+				background: none;
+			}
+		}
+	}
 }
