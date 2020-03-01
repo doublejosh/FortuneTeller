@@ -8,6 +8,7 @@ let style = css({
 	textAlign: 'center',
 	'@media (min-width: 600px)': {
 		textAlign: 'left',
+		margin: '0 0 6rem 0',
 	},
 })
 
