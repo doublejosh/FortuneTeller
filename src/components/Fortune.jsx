@@ -21,7 +21,7 @@ export default f => {
 				style={{ width: width + '%' }}
 				className={'score-badge' + classes}
 			>
-				{f.score}%
+				<span className="number">{f.score}%</span>
 			</div>
 			<div className="data">
 				Seen: {f.shown} | Votes: {f.votes}

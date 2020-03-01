@@ -132,8 +132,6 @@ h1 {
 
 			.score-badge {
 				position: absolute;
-				font-size: 1.25rem;
-				color: #000;
 				right: 0;
 				top: 0;
 				height: 100%;
@@ -147,7 +145,12 @@ h1 {
 				display: flex;
 				align-items: center;
 				justify-content: flex-end;
-				padding: 0 1rem;
+
+				.number {
+					color: #000;
+					font-size: 1.25rem;
+					padding: 0 1rem;
+				}
 			}
 			.score-badge.low-score {
 				color: rgba(0, 0, 0, 0.3);
