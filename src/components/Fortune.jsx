@@ -6,13 +6,10 @@ export default f => {
 		return desktopQuery.matches
 	}
 
-	const multiplier = isDesktop() ? 2 : 1
 	const minWidth = isDesktop() ? 20 : 10
 	const minScore = 10
-	const width = f.score > minScore ? f.score * multiplier : minWidth
+	const width = f.score > minScore ? f.score : minWidth
 	const classes = f.score < minScore ? ' low-score' : ''
-
-	console.log(multiplier)
 
 	return (
 		<li>

@@ -3,13 +3,6 @@ import { useSelector } from 'react-redux'
 import { useFirebaseConnect } from 'react-redux-firebase'
 import Fortune from './Fortune'
 
-// const fortuneList = state => state.firebase.data.fortunes
-// const categoryId = state => state.id
-// export const filteredFortunes = createSelector(
-// 	[fortuneList, categoryId],
-// 	(fortunes, id) => fortunes.filter(f => f.category === id)
-// )
-
 export default props => {
 	useFirebaseConnect([
 		{
@@ -22,17 +15,15 @@ export default props => {
 		return Math.round((parseInt(votes) / parseInt(shown)) * 100)
 	}
 
-	// return list.map(f => {
-	// 	return { ...f, score: getScore(f.votes, f.shown) }
-	// })
-
 	const fortunes = useSelector(state => state.firebase.data.fortunes)
 	let totalShown = 0,
 		totalVotes = 0
 
 	return (
 		<section className={'category ' + props.id}>
-			<h3>{props.label}</h3>
+			<h3>
+				{props.label} - {props.votes}
+			</h3>
 			<ul className="fortunes">
 				{fortunes &&
 					fortunes

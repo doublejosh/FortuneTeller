@@ -1,13 +1,13 @@
-import React from 'react';
-import Logo from './Logo';
-import Categories from './Categories';
-import '../style.scss';
+import React from 'react'
+import Logo from './Logo'
+import Categories from './Categories'
+import '../style.scss'
 
 export default () => {
-    return (
-        <React.Fragment>
-            <Logo />
-            <Categories />
-        </React.Fragment>
-    );
-};
+	return (
+		<React.Fragment>
+			<Logo />
+			<Categories />
+		</React.Fragment>
+	)
+}
