@@ -26,7 +26,7 @@ export default props => {
 						})}
 			</ul>
 			<div className="count-badge">
-				{totalVotes} / {totalShown}
+				{totalVotes}/{totalShown}
 				{' (' + Math.round((totalVotes / totalShown) * 100)}%)
 			</div>
 		</section>

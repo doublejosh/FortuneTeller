@@ -1,6 +1,7 @@
 import React from 'react'
 import Logo from './Logo'
 import Categories from './Categories'
+import Links from './Links'
 import '../style.scss'
 
 export default () => {
@@ -8,6 +9,7 @@ export default () => {
 		<React.Fragment>
 			<Logo />
 			<Categories />
+			<Links />
 		</React.Fragment>
 	)
 }
