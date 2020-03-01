@@ -21,7 +21,7 @@ export default f => {
 				<span className="number">{f.score}%</span>
 			</div>
 			<div className="data">
-				Seen: {f.shown} | Votes: {f.votes}
+				{f.votes} votes / {f.shown} views
 			</div>
 		</li>
 	)
