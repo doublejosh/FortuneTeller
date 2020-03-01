@@ -1,4 +1,15 @@
 import React, { useMemo } from 'react'
+import { css } from 'glamor'
+
+let style = css({
+	fontSize: '2.5rem',
+	margin: '0 0 24rem 0',
+	color: 'rgba(0, 0, 0, 0.6)',
+	textAlign: 'center',
+	'@media (min-width: 600px)': {
+		textAlign: 'left',
+	},
+})
 
 export default props => {
 	const findTotal = fortunes => {
@@ -16,7 +27,7 @@ export default props => {
 	const totals = useMemo(() => findTotal(props.fortunes), [props.fortunes])
 
 	return (
-		<section className="stats">
+		<section className={style}>
 			{Math.round(
 				(parseInt(totals.votes) / parseInt(totals.shown)) * 100
 			)}

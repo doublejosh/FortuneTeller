@@ -1,4 +1,5 @@
 import React from 'react'
+import { css } from 'glamor'
 import githubImg from '../static/img/github.svg'
 import tumblrImg from '../static/img/tumblr.svg'
 
@@ -15,8 +16,25 @@ const links = [
 	},
 ]
 
+let style = css({
+	'& ul': {
+		listStyle: 'none',
+		margin: '5rem 0 0 0',
+		padding: 0,
+		textAlign: 'center',
+
+		'& li': {
+			display: 'inline',
+			marginRight: '2rem',
+		},
+	},
+	'& img': {
+		width: '40px',
+	},
+})
+
 export default () => (
-	<section className="links">
+	<section className={style}>
 		<ul>
 			{links &&
 				links.map((l, i) => (

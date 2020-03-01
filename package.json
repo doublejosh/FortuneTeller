@@ -21,6 +21,7 @@
 	},
 	"dependencies": {
 		"firebase": "^7.2.3",
+		"glamor": "^2.20.40",
 		"jquery": "^3.4.1",
 		"node-sass": "^4.13.1",
 		"react": "^16.8.6",
