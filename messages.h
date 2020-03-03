@@ -1,6 +1,14 @@
 #define WIDTH 20
 #define HEIGHT 4
 
+char REBOOT_FORTUNES[][WIDTH*HEIGHT] = {
+	"A glitch in the system stops me from telling you now.",
+	"The internets are on fire, and don't want you to know.",
+	"I'm going to need at least another quarter to decide.",
+	"You don't believe a machine can predict your future, so what's the point?",
+	"Eventually my predictions will be perfect, not today."
+};
+
 #define GREET1 0
 #define GREET2 1
 #define BOOT 3

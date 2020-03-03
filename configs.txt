@@ -16,7 +16,8 @@ String WIFI_PASSWORD[] = {
 
 const uint8_t TRIGGER_PIN = D8,
   BTN1_PULLUP = D7,
-  BTN2_PULLUP = D6;
+  BTN2_PULLUP = D6,
+   ANALOG_PIN = A0;
 
 const int displayRS = D5,
   displayEN = D0,

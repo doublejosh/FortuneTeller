@@ -13,9 +13,9 @@ let style = css({
 })
 
 export default props => {
+	let totals = { votes: 1, shown: 1 }
 	const findTotal = fortunes => {
-		let votes = 0,
-			shown = 0
+		let votes = 0, shown = 0
 		if (fortunes) {
 			fortunes.forEach(f => {
 				votes += f.votes
@@ -24,15 +24,14 @@ export default props => {
 		}
 		return { votes: votes, shown: shown }
 	}
-
-	const totals = useMemo(() => findTotal(props.fortunes), [props.fortunes])
+	totals = useMemo(() => findTotal(props.fortunes), [props.fortunes])
 
 	return (
 		<section className={style}>
 			{Math.round(
 				(parseInt(totals.votes) / parseInt(totals.shown)) * 100
 			)}
-			% "Accurate" <br />({totals.votes}/{totals.shown})
+			% accurate <br />({totals.votes}/{totals.shown})
 		</section>
 	)
 }

@@ -3,22 +3,23 @@
 #include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
 #include <math.h>
+#include <string>
 #include "utilities.h"
 #include "animation.h"
 #include "messages.h"
 
-uint8_t trigger, wifiTry = 0, sleepFrame = 0;
-uint32_t timer = 1;
-boolean offline = false;
-bool randomChoice = false;
+uint8_t __trigger, __sleepFrame = 0;
+uint32_t __timer = 1;
+bool __offline = false, __randomChoice = false;
+String __interactionId;
 
-LiquidCrystal lcd(
+LiquidCrystal __lcd(
 	displayRS, displayEN, displayD4,
 	displayD5, displayD6, displayD7
 );
 
-FirebaseData fbData;
-DynamicJsonDocument jsonDoc(JSON_DOC_BYTES);
+FirebaseData __fbData;
+DynamicJsonDocument __jsonDoc(JSON_DOC_BYTES);
 
 typedef struct {
 	unsigned int id;
@@ -33,7 +34,7 @@ typedef struct {
 	String text;
 	unsigned int version;
 } Question;
-Question Q_LIST[QUESTION_LIST_LENGTH];
+Question _questionList[QUESTION_LIST_LENGTH];
 
 // SCREEN...
 
@@ -41,13 +42,13 @@ Question Q_LIST[QUESTION_LIST_LENGTH];
  * Show animation frame to the screen.
  */
 void paint (char screen[HEIGHT][WIDTH+1], int wait) {
-	lcd.noDisplay();
-	lcd.clear();
+	__lcd.noDisplay();
+	__lcd.clear();
 	for (uint8_t i = 0; i < sizeof(screen); i++) {
-		lcd.setCursor(0, i);
-		lcd.print(String(screen[i]));
+		__lcd.setCursor(0, i);
+		__lcd.print(String(screen[i]));
 	}
-	lcd.display();
+	__lcd.display();
 	delay(wait);
 }
 
@@ -64,8 +65,9 @@ void play (char frames[][HEIGHT][WIDTH+1], uint8_t count) {
  * Show text message on the screen.
  */
 void txtToScreen (String msg, int wait, int row) {
-	lcd.clear();
-	wrapTxtToScreen(lcd, msg);
+	__lcd.clear();
+	__lcd.setCursor(0, row);
+	__lcd.print(msg);
 	delay(wait);
 }
 
@@ -74,6 +76,7 @@ void txtToScreen (String msg, int wait, int row) {
  */
 bool connect (void) {
 	String msg;
+	uint8_t wifiTry = 0;
 
 	for (uint8_t i = 0; i < sizeof(WIFI_SSID)/sizeof(WIFI_SSID[0]); i++) {
 		printDebug("Connecting: " + WIFI_SSID[i]);
@@ -108,15 +111,15 @@ bool connect (void) {
   	if (WiFi.status() != WL_CONNECTED) {
 		printDebug("Wifi Error, please restart.");
     	paint(MESSAGES[2], DELAY_MSG);
-		offline = true;
+		__offline = true;
 		return false;
   	} else {
 		Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
 		Firebase.reconnectWiFi(true);
-		Firebase.setReadTimeout(fbData, READ_TIMEOUT);
-		Firebase.setMaxRetry(fbData, FIREBASE_MAX_TRY);
-		fbData.setBSSLBufferSize(2048, 2048);
-		fbData.setResponseSize(2048);
+		Firebase.setReadTimeout(__fbData, READ_TIMEOUT);
+		Firebase.setMaxRetry(__fbData, FIREBASE_MAX_TRY);
+		__fbData.setBSSLBufferSize(2048, 2048);
+		__fbData.setResponseSize(2048);
 		return true;
 	}
 }
@@ -128,24 +131,24 @@ bool connect (void) {
  * Retrieve string field within JSON data.
  */
 String getString (String key) {
-	if (Firebase.getShallowData(fbData, key)) {
-		if (fbData.dataType() == "string") {
-			String text = fbData.stringData();
+	if (Firebase.getShallowData(__fbData, key)) {
+		if (__fbData.dataType() == "string") {
+			String text = __fbData.stringData();
 			return text;
 		}
-	} else printDebug(fbData.errorReason());
+	} else printDebug(__fbData.errorReason());
 }
 
 /**
  * Retrieve int field within JSON data.
  */
 unsigned int getInt (String key) {
-	if (Firebase.getShallowData(fbData, key)) {
-		if (fbData.dataType() == "int") {
-			int num = fbData.intData();
+	if (Firebase.getShallowData(__fbData, key)) {
+		if (__fbData.dataType() == "int") {
+			int num = __fbData.intData();
 			return num;
 		}
-	} else printDebug(fbData.errorReason());
+	} else printDebug(__fbData.errorReason());
 }
 
 /**
@@ -154,9 +157,9 @@ unsigned int getInt (String key) {
 void fetchQuestions () {
 	if (CHROME) txtToScreen("Fetching questions.", DELAY_QUICK_MSG, 1);
 	printDebug("Fetching questions.");
-	if (Firebase.getShallowData(fbData, QUESTION_PATH)) {
+	if (Firebase.getShallowData(__fbData, QUESTION_PATH)) {
 		FirebaseJson json;
-		size_t lineCount = json.iteratorBegin(fbData.jsonString().c_str());
+		size_t lineCount = json.iteratorBegin(__fbData.jsonString().c_str());
 		String _key, _val, prefix;
 		int _type = 0;
 		for (size_t i = 0; i < lineCount; i++) {
@@ -169,14 +172,14 @@ void fetchQuestions () {
 					getString(prefix + FIELD_TEXT),
 					getInt(prefix + FIELD_VERSION)
 				};
-				Q_LIST[i] = question;
+				_questionList[i] = question;
 			}
 			delay(0);
 		}
 		json.iteratorEnd();
 	}
-	else printDebug(fbData.errorReason());
-	fbData.clear();
+	else printDebug(__fbData.errorReason());
+	__fbData.clear();
 }
 
 /**
@@ -185,17 +188,17 @@ void fetchQuestions () {
 void increaseMetric(String fortuneId, String field) {
 	int metric;
 	String path = FORTUNES_PATH + "/" + fortuneId + "/" + field;
-	if (Firebase.getInt(fbData, path)) {
-		metric = fbData.intData();
+	if (Firebase.getInt(__fbData, path)) {
+		metric = __fbData.intData();
 		printDebug("Count " + field + ": " + metric);
 		// Update value.
 		if (!TESTING) {
-			if (Firebase.setInt(fbData, path, metric+1)) {
+			if (Firebase.setInt(__fbData, path, metric+1)) {
 				printDebug("Updated " + field + ".");
-			} else printDebug(fbData.errorReason());
+			} else printDebug(__fbData.errorReason());
 		} else printDebug("Skipped increase for testing mode.");
-	} else printDebug(fbData.errorReason());
-	fbData.clear();
+	} else printDebug(__fbData.errorReason());
+	__fbData.clear();
 }
 
 /**
@@ -211,10 +214,10 @@ int8_t ask (uint16_t timeout) {
 	while (currentTime - startTime <= timeout) {
 		currentTime = millis();
 		uint8_t seconds = (currentTime - startTime) / 1000;
-		lcd.setCursor(18, 3);
-		lcd.print("  ");
-		lcd.setCursor(18, 3);
-		lcd.print(String((timeout / 1000) - seconds));
+		__lcd.setCursor(18, 3);
+		__lcd.print("  ");
+		__lcd.setCursor(18, 3);
+		__lcd.print(String((timeout / 1000) - seconds));
 		// Accept the answer.
 		bool voteYes = (digitalRead(BTN2_PULLUP) == LOW);
 		if (voteYes || (digitalRead(BTN1_PULLUP) == LOW)) {
@@ -234,12 +237,12 @@ int8_t ask (uint16_t timeout) {
 JsonObject buildFortuneIndex(String jsonStr, String index[]) {
 	printDebug("fortunes indexed.");
 	// Parse JSON from string.
-	DeserializationError e = deserializeJson(jsonDoc, jsonStr);
+	DeserializationError e = deserializeJson(__jsonDoc, jsonStr);
 	if (e.code() == DeserializationError::NoMemory) {
 		printDebug("Not enough JSON memory.");
 	}
 	// Create index of ids.
-	JsonObject listObj = jsonDoc.as<JsonObject>();
+	JsonObject listObj = __jsonDoc.as<JsonObject>();
 	uint8_t id = 0;
 	for (JsonObject::iterator i=listObj.begin(); i!=listObj.end(); ++i) {
 		index[id] = String(i->key().c_str());
@@ -268,10 +271,10 @@ void saveInteraction (int fortune, String category, int accurate, double sensor,
 
 	if (CHROME) paint(MESSAGES[SAVE], DELAY_MSG);
 	if (!TESTING) {
-		if (Firebase.pushJSON(fbData, INTERACTIONS_PATH, fbJson)) {
+		if (Firebase.setJSON(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
 			// @todo Save the timestamp.
 			// https://github.com/doublejosh/FortuneTeller/issues/2
-			//pushTimestamp(fbData, const String &path);
+			//pushTimestamp(__fbData, const String &path);
 			printDebug("Ready.");
 			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
 		} else printDebug("SAVE ERROR");
@@ -279,6 +282,7 @@ void saveInteraction (int fortune, String category, int accurate, double sensor,
 		printDebug("Save skipped for testing.");
 	}
 
+	__interactionId = "";
 	fbJson.clear();
 }
 
@@ -295,23 +299,22 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
 	query.equalTo(category);
 	query.limitToFirst(FORTUNE_GET_MAX);
 	String index[FORTUNE_INDEX_MAX];
-	if (Firebase.getJSON(fbData, FORTUNES_PATH, query)) {
+	if (Firebase.getJSON(__fbData, FORTUNES_PATH, query)) {
 		// Create string.
 		printDebug("Fortunes fetched.");
-		FirebaseJson &json = fbData.jsonObject();
+		FirebaseJson &json = __fbData.jsonObject();
 		String jsonStr;
 		json.toString(jsonStr, false); // Param two is prettify.
 		printDebug(jsonStr);
 
 		// Pick from the list.
-		uint8_t picker;
 		JsonObject listObj = buildFortuneIndex(jsonStr, index);
 		printDebug("SIZE:" + String(listObj.size()));
-
 		String fortuneId = index[random(0, listObj.size())];
 		const char* fortune = listObj[fortuneId][FIELD_TEXT];
 		printDebug(fortune);
-		txtToScreen(fortune, DELAY_FORTUNE, 0);
+		wrapTxtToScreen(__lcd, fortune);
+		delay(DELAY_FORTUNE);
 		increaseMetric(fortuneId, FIELD_SHOWN);
 
 		// Ask for accuracy.
@@ -319,21 +322,16 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
 		int result = ask(timeout);
 		if (result == ANSWER_YES) {
 			paint(MESSAGES[CORRECT], DELAY_MSG);
-			increaseMetric(index[picker].c_str(), FIELD_VOTES);
+			increaseMetric(fortuneId, FIELD_VOTES);
 		} else if (result == ANSWER_NO) {
 			paint(MESSAGES[WRONG], DELAY_MSG);
 		} else {
 			paint(MESSAGES[TIMEOUT], DELAY_MSG);
 		}
-
-    time_t my_time = time(NULL); 
-    // ctime() used to give the present time 
-    printf("%s", ctime(&my_time));
-
 		// Record interaction data.
-		saveInteraction(atoi(fortuneId.c_str()), category, result, sensor, version, randomChoice);
-	} else printDebug(fbData.errorReason());
-	fbData.clear();
+		saveInteraction(atoi(fortuneId.c_str()), category, result, sensor, version, __randomChoice);
+	} else printDebug(__fbData.errorReason());
+	__fbData.clear();
 }
 
 /**
@@ -345,8 +343,8 @@ void askQuestion (String id, unsigned int version) {
 	// Grab data from cached global and show.
 	Question question;
 	bool questionFound = false;
-	for (uint8_t i = 0; i < sizeof(Q_LIST) / sizeof(Q_LIST[0]); i++) {
-		question = Q_LIST[i];
+	for (uint8_t i = 0; i < sizeof(_questionList) / sizeof(_questionList[0]); i++) {
+		question = _questionList[i];
 		if (question.name == id) {
 			printDebug(question.text);
 			if (CHROME) play(APPEAR_FRAMES, 6);
@@ -377,10 +375,30 @@ void askQuestion (String id, unsigned int version) {
 	} else {
 		paint(MESSAGES[RANDOM], DELAY_MSG);
 		// Mark interactions with random selection.
-		randomChoice = true;
+		__randomChoice = true;
 		next = (random(9) % 2) ? question.nextYes : question.nextNo;
 	}
 	askQuestion(next, question.version);
+}
+
+void initSaveInteraction() {
+	__interactionId = String(random(100000000));
+
+	FirebaseJson fbJson;
+	fbJson.set(FIELD_MACHINE, MACHINE_ID);
+	if (!TESTING) {
+		if (Firebase.setJSON(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
+			// @todo Save the timestamp.
+			// https://github.com/doublejosh/FortuneTeller/issues/2
+			//pushTimestamp(__fbData, const String &path);
+			printDebug(F("Created interaction record."));
+			printDebug(__fbData.pushName());
+		} else printDebug("SAVE ERROR");
+	} else {
+		printDebug("Save skipped for testing.");
+	}
+
+	fbJson.clear();
 }
 
 /**
@@ -394,26 +412,40 @@ void coin () {
 		paint(MESSAGES[GREET1], DELAY_MSG);
 		play(APPEAR_FRAMES, 6);
 		paint(MESSAGES[GREET2], DELAY_QUICK_MSG);
-		play(APPEAR_FRAMES, 6);
-		paint(MESSAGES[GREET3], DELAY_QUICK_MSG);
-	} else {
-		paint(MESSAGES[FREEBIE], DELAY_MSG);
+		// play(APPEAR_FRAMES, 6);
+		// paint(MESSAGES[GREET3], DELAY_QUICK_MSG);
 	}
 	// Start question tree.
-	randomChoice = false;
+	initSaveInteraction();
+	__randomChoice = false;
 	String next = FIRST_QUESTION_ID;
 	askQuestion(next, 0);
+}
+
+/**
+ * In case of shut down due to: watchdog reset, crash, network failure, etc.
+ */
+void rebootFortune () {
+	int len = sizeof(REBOOT_FORTUNES) / sizeof(REBOOT_FORTUNES[0]);
+
+	int pick = random(0, len);
+	__lcd.clear();
+	printDebug(String(len));
+	printDebug(String(pick));
+	wrapTxtToScreen(__lcd, REBOOT_FORTUNES[pick]);
+	delay(DELAY_FORTUNE);
+	txtToScreen(F("    Reconnecting"), DELAY_MSG, 1);
 }
 
 /**
  * Listen for coins and nudge animation.
  */
 void sleep () {
-	timer++;
-	if (timer == DELAY_SLEEP) {
-		paint(SLEEP_FRAMES[sleepFrame], DELAY_NONE);
-		sleepFrame = (sleepFrame < 3) ? sleepFrame + 1 : 0;
-		timer = 0;
+	__timer++;
+	if (__timer == DELAY_SLEEP) {
+		paint(SLEEP_FRAMES[__sleepFrame], DELAY_NONE);
+		__sleepFrame = (__sleepFrame < 3) ? __sleepFrame + 1 : 0;
+		__timer = 0;
 	}
 	delay(10);
 }
@@ -422,12 +454,14 @@ void sleep () {
 // STANDARD...
 
 void setup (void) {
-	lcd.begin(20, 4);
+	if (DEBUG) Serial.begin(1000000);
+	__lcd.begin(20, 4);
+
 	pinMode(TRIGGER_PIN, INPUT);
 	pinMode(BTN1_PULLUP, INPUT_PULLUP);
 	pinMode(BTN2_PULLUP, INPUT_PULLUP);
-	if (DEBUG) Serial.begin(1000000);
-	randomSeed(analogRead(0));
+	int analogVal = analogRead(ANALOG_PIN);
+	randomSeed(analogRead(analogVal));
 
 	// On-the-fly alternate modes.
 	if (digitalRead(BTN1_PULLUP) == LOW) {
@@ -437,12 +471,21 @@ void setup (void) {
 		FREEPLAY = true;
 	}
 
-	if (CHROME) paint(MESSAGES[BOOT], DELAY_QUICK_MSG);
-	else {
-		lcd.setCursor(0, 1);
-		lcd.print("      8(*__*)8");
+	// Improve UX on reboot.
+	if (CHROME) {
+		delay(1000);
+		rebootFortune();
 	}
 
+	// Welcome messages.
+	if (CHROME) paint(MESSAGES[BOOT], DELAY_QUICK_MSG);
+	else {
+		__lcd.clear();
+		__lcd.setCursor(0, 1);
+		__lcd.print("      8(*__*)8");
+	}
+
+	// Get and stash question data.
 	if (connect()) {
 		if (TESTING) {
 			printDebug("Running fortune tests...");
@@ -460,8 +503,11 @@ void setup (void) {
 void loop (void) {
 	// @todo Use interrupts for coin trigger listening.
 	// https://github.com/doublejosh/FortuneTeller/issues/1
-	trigger = digitalRead(TRIGGER_PIN);
-	if (trigger == HIGH || (FREEPLAY && digitalRead(BTN2_PULLUP) == LOW)) {
+	__trigger = digitalRead(TRIGGER_PIN);
+	if (__trigger == HIGH) {
+		coin();
+	} else if (FREEPLAY && digitalRead(BTN2_PULLUP) == LOW) {
+		paint(MESSAGES[FREEBIE], DELAY_MSG);
 		coin();
 	} else sleep();
 }
