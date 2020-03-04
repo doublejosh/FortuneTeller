@@ -114,6 +114,7 @@ bool connect (void) {
 		__offline = true;
 		return false;
   	} else {
+		// Setup Firebase connection and fetch handler.
 		Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
 		Firebase.reconnectWiFi(true);
 		Firebase.setReadTimeout(__fbData, READ_TIMEOUT);
@@ -163,6 +164,7 @@ void fetchQuestions () {
 		String _key, _val, prefix;
 		int _type = 0;
 		for (size_t i = 0; i < lineCount; i++) {
+			// Assemble object from return data.
 			json.iteratorGet(i, _type, _key, _val);
 			prefix = QUESTION_PATH + "/" + _key + "/";
 			if (_val == "true") {
@@ -202,7 +204,7 @@ void increaseMetric(String fortuneId, String field) {
 }
 
 /**
- * Wait and collect a yes no answer from user.
+ * Wait and collect a yes/no answer from user.
  */
 #define ANSWER_YES 1
 #define ANSWER_NO 0
@@ -224,7 +226,7 @@ int8_t ask (uint16_t timeout) {
 			return (voteYes) ? ANSWER_YES : ANSWER_NO;
 		}
 		// @todo Use interrupts button listening.
-		https://github.com/doublejosh/FortuneTeller/issues/1
+		// https://github.com/doublejosh/FortuneTeller/issues/1
 		// Keep the ESP watchdog happy (avoid soft reset).
 		delay(200);
 	}
@@ -269,6 +271,7 @@ void saveInteraction (int fortune, String category, int accurate, double sensor,
 	fbJson.set(FIELD_RANDOM, random);
 	fbJson.set(FIELD_MACHINE, MACHINE_ID);
 
+	// Send interaction data.
 	if (CHROME) paint(MESSAGES[SAVE], DELAY_MSG);
 	if (!TESTING) {
 		if (Firebase.setJSON(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
@@ -281,7 +284,7 @@ void saveInteraction (int fortune, String category, int accurate, double sensor,
 	} else {
 		printDebug("Save skipped for testing.");
 	}
-
+	// Clear data for the next user.
 	__interactionId = "";
 	fbJson.clear();
 }
@@ -300,21 +303,22 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
 	query.limitToFirst(FORTUNE_GET_MAX);
 	String index[FORTUNE_INDEX_MAX];
 	if (Firebase.getJSON(__fbData, FORTUNES_PATH, query)) {
-		// Create string.
+
+		// Parse fortune list results.
 		printDebug("Fortunes fetched.");
 		FirebaseJson &json = __fbData.jsonObject();
 		String jsonStr;
 		json.toString(jsonStr, false); // Param two is prettify.
 		printDebug(jsonStr);
+		JsonObject listObj = buildFortuneIndex(jsonStr, index);
 
 		// Pick from the list.
-		JsonObject listObj = buildFortuneIndex(jsonStr, index);
-		printDebug("SIZE:" + String(listObj.size()));
 		String fortuneId = index[random(0, listObj.size())];
 		const char* fortune = listObj[fortuneId][FIELD_TEXT];
 		printDebug(fortune);
 		wrapTxtToScreen(__lcd, fortune);
 		delay(DELAY_FORTUNE);
+		// Analytics for views of each fortune.
 		increaseMetric(fortuneId, FIELD_SHOWN);
 
 		// Ask for accuracy.
@@ -328,8 +332,9 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
 		} else {
 			paint(MESSAGES[TIMEOUT], DELAY_MSG);
 		}
-		// Record interaction data.
+		// Record full interaction data.
 		saveInteraction(atoi(fortuneId.c_str()), category, result, sensor, version, __randomChoice);
+
 	} else printDebug(__fbData.errorReason());
 	__fbData.clear();
 }
@@ -362,10 +367,10 @@ void askQuestion (String id, unsigned int version) {
 		// @todo Handle no fortune.
 		return;
 	}
-
 	int result = ask(QUESTION_TIMEOUT);
-	String next;
+
 	// Go to the next step.
+	String next;
 	if (result == ANSWER_YES) {
 		paint(MESSAGES[PICK_YES], DELAY_QUICK_MSG);
 		next = question.nextYes;
@@ -381,9 +386,11 @@ void askQuestion (String id, unsigned int version) {
 	askQuestion(next, question.version);
 }
 
+/**
+ * Create (almost) empty interaction event, for crash metrics.
+ */
 void initSaveInteraction() {
 	__interactionId = String(random(100000000));
-
 	FirebaseJson fbJson;
 	fbJson.set(FIELD_MACHINE, MACHINE_ID);
 	if (!TESTING) {
@@ -394,15 +401,13 @@ void initSaveInteraction() {
 			printDebug(F("Created interaction record."));
 			printDebug(__fbData.pushName());
 		} else printDebug("SAVE ERROR");
-	} else {
-		printDebug("Save skipped for testing.");
-	}
+	} else printDebug("Save skipped for testing.");
 
 	fbJson.clear();
 }
 
 /**
- * Handle kickoff of interaction.
+ * Kickoff new interaction.
  */
 void coin () {
 	// Greeting routine.
@@ -412,13 +417,14 @@ void coin () {
 		paint(MESSAGES[GREET1], DELAY_MSG);
 		play(APPEAR_FRAMES, 6);
 		paint(MESSAGES[GREET2], DELAY_QUICK_MSG);
+		// Button instructions.
 		// play(APPEAR_FRAMES, 6);
 		// paint(MESSAGES[GREET3], DELAY_QUICK_MSG);
 	}
 	// Start question tree.
-	initSaveInteraction();
 	__randomChoice = false;
 	String next = FIRST_QUESTION_ID;
+	initSaveInteraction();
 	askQuestion(next, 0);
 }
 
@@ -427,7 +433,6 @@ void coin () {
  */
 void rebootFortune () {
 	int len = sizeof(REBOOT_FORTUNES) / sizeof(REBOOT_FORTUNES[0]);
-
 	int pick = random(0, len);
 	__lcd.clear();
 	printDebug(String(len));
@@ -456,7 +461,6 @@ void sleep () {
 void setup (void) {
 	if (DEBUG) Serial.begin(1000000);
 	__lcd.begin(20, 4);
-
 	pinMode(TRIGGER_PIN, INPUT);
 	pinMode(BTN1_PULLUP, INPUT_PULLUP);
 	pinMode(BTN2_PULLUP, INPUT_PULLUP);
@@ -485,7 +489,7 @@ void setup (void) {
 		__lcd.print("      8(*__*)8");
 	}
 
-	// Get and stash question data.
+	// Fetch and stash question data.
 	if (connect()) {
 		if (TESTING) {
 			printDebug("Running fortune tests...");

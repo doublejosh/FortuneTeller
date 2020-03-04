@@ -44,8 +44,9 @@ char* FIELD_FORTUNE_ID = "fortune";
 char* FIELD_VERSION    = "version";
 char* FIELD_SENSOR     = "sensor";
 char* FIELD_RANDOM     = "random";
+char* FIELD_MACHINE    = "machine";
 
-String MACHINE_ID = "homegame";
+String MACHINE_ID = "my-location";
 
 // SETTINGS...
 
@@ -62,8 +63,8 @@ bool FREEPLAY = false;
 uint16_t DELAY_NONE = 0,
           DELAY_MSG = 4000,
     DELAY_QUICK_MSG = 2500,
-    DELAY_ANIMATION = 350,
-      DELAY_FORTUNE = 12000,
+    DELAY_ANIMATION = 180,
+      DELAY_FORTUNE = 9000,
         DELAY_SLEEP = 40, // Loop count.
    QUESTION_TIMEOUT = 30000,
        FAST_TIMEOUT = 2000,
