@@ -46,7 +46,7 @@ char* FIELD_SENSOR     = "sensor";
 char* FIELD_RANDOM     = "random";
 char* FIELD_MACHINE    = "machine";
 
-String MACHINE_ID = "my-location";
+String MACHINE_ID = "homegame";
 
 // SETTINGS...
 
@@ -73,6 +73,8 @@ uint16_t DELAY_NONE = 0,
 
 #define DEBUG false
 #define TESTING false
-#define FIREBASE_MAX_TRY 3
-#define FIREBASE_BUFFER_SZE 2048
+#define FIREBASE_MAX_TRY 5
+#define FIREBASE_BUFFER_SIZE_RECEIVE 2048
+#define FIREBASE_BUFFER_SIZE_SEND 2048
+#define FIREBASE_RESPONSE_SIZE 4096
 #define JSON_DOC_BYTES 2048

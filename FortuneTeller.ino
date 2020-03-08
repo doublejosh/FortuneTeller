@@ -119,8 +119,8 @@ bool connect (void) {
 		Firebase.reconnectWiFi(true);
 		Firebase.setReadTimeout(__fbData, READ_TIMEOUT);
 		Firebase.setMaxRetry(__fbData, FIREBASE_MAX_TRY);
-		__fbData.setBSSLBufferSize(2048, 2048);
-		__fbData.setResponseSize(2048);
+		__fbData.setBSSLBufferSize(FIREBASE_BUFFER_SIZE_RECEIVE, FIREBASE_BUFFER_SIZE_SEND);
+		__fbData.setResponseSize(FIREBASE_RESPONSE_SIZE);
 		return true;
 	}
 }
@@ -277,7 +277,7 @@ void saveInteraction (int fortune, String category, int accurate, double sensor,
 		if (Firebase.setJSON(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
 			// @todo Save the timestamp.
 			// https://github.com/doublejosh/FortuneTeller/issues/2
-			//pushTimestamp(__fbData, const String &path);
+			// Firebase.pushTimestamp(__fbData, const String &path);
 			printDebug("Ready.");
 			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
 		} else printDebug("SAVE ERROR");
@@ -302,6 +302,8 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
 	query.equalTo(category);
 	query.limitToFirst(FORTUNE_GET_MAX);
 	String index[FORTUNE_INDEX_MAX];
+	// @todo Catch or handle fortune network fails.
+	// https://github.com/doublejosh/FortuneTeller/issues/3
 	if (Firebase.getJSON(__fbData, FORTUNES_PATH, query)) {
 
 		// Parse fortune list results.
@@ -460,7 +462,7 @@ void sleep () {
 
 void setup (void) {
 	if (DEBUG) Serial.begin(1000000);
-	__lcd.begin(20, 4);
+	__lcd.begin(WIDTH, HEIGHT);
 	pinMode(TRIGGER_PIN, INPUT);
 	pinMode(BTN1_PULLUP, INPUT_PULLUP);
 	pinMode(BTN2_PULLUP, INPUT_PULLUP);
@@ -477,6 +479,7 @@ void setup (void) {
 
 	// Improve UX on reboot.
 	if (CHROME) {
+		// Delay required for random seed.
 		delay(1000);
 		rebootFortune();
 	}
@@ -493,10 +496,10 @@ void setup (void) {
 	if (connect()) {
 		if (TESTING) {
 			printDebug("Running fortune tests...");
-			fetchFortune ("heart", 123.00, 2, FAST_TIMEOUT);
-			fetchFortune ("fate", 123.00, 2, FAST_TIMEOUT);
-			fetchFortune ("health", 123.00, 2, FAST_TIMEOUT);
-			fetchFortune ("fortune", 123.00, 2, FAST_TIMEOUT);
+			fetchFortune("heart", 123.00, 2, FAST_TIMEOUT);
+			fetchFortune("fate", 123.00, 2, FAST_TIMEOUT);
+			fetchFortune("health", 123.00, 2, FAST_TIMEOUT);
+			fetchFortune("fortune", 123.00, 2, FAST_TIMEOUT);
 		}
 		fetchQuestions();
 		printDebug("Ready.");
