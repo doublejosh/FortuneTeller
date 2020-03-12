@@ -11,7 +11,7 @@
 uint8_t __trigger, __sleepFrame = 0;
 uint32_t __timer = 1;
 bool __offline = false, __randomChoice = false;
-String __interactionId;
+String __interactionId = "";
 
 LiquidCrystal __lcd(
 	displayRS, displayEN, displayD4,
@@ -194,7 +194,7 @@ void increaseMetric(String fortuneId, String field) {
 		metric = __fbData.intData();
 		printDebug("Count " + field + ": " + metric);
 		// Update value.
-		if (!TESTING) {
+		if (SAVING) {
 			if (Firebase.setInt(__fbData, path, metric+1)) {
 				printDebug("Updated " + field + ".");
 			} else printDebug(__fbData.errorReason());
@@ -258,44 +258,72 @@ JsonObject buildFortuneIndex(String jsonStr, String index[]) {
 }
 
 /**
- * Save interaction online.
+ * Create inital interaction event to Firebase, for crash awareness.
  */
-void saveInteraction (int fortune, String category, int accurate, double sensor, int version, bool random) {
+void saveInteractionInit () {
+	printDebug("SAVING...");
+	FirebaseJson fbJson;
+	fbJson.set(FIELD_MACHINE, MACHINE_ID);
+	// Send interaction data.
+	if (SAVING) {
+		if (Firebase.pushJSON(__fbData, INTERACTIONS_PATH, fbJson)) {
+			__interactionId = __fbData.pushName();
+			// Add a timestamp.
+			Firebase.setTimestamp(__fbData, INTERACTIONS_PATH + "/" + __interactionId + "/" + FIELD_CREATED);
+			printDebug(F("Created interaction record."));
+		} else printDebug(F("SAVE ERROR"));
+	} else printDebug(F("Save skipped for testing."));
+}
+
+/**
+ * Save mid-point interaction data to Firebase, for crash awareness.
+ */
+void saveInteractionMiddle (const String category, double sensor, int version) {
+	printDebug("SAVING...");
+	FirebaseJson fbJson;
+	fbJson.set(FIELD_CATEGORY, category);
+	fbJson.set(FIELD_SENSOR, sensor);
+	fbJson.set(FIELD_VERSION, version);
+	fbJson.set(FIELD_RANDOM, __randomChoice);
+	// Send interaction data.
+	if (SAVING) {
+		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
+			printDebug("Interaction data saved.");
+			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
+		} else printDebug("SAVE ERROR");
+	} else {
+		printDebug("Save skipped for testing.");
+	}
+}
+
+/**
+ * Save final interaction data to Firebase.
+ */
+void saveInteractionEnd (int fortune, int accurate) {
 	printDebug("SAVING...");
 	FirebaseJson fbJson;
 	fbJson.set(FIELD_FORTUNE_ID, fortune);
-	fbJson.set(FIELD_CATEGORY, category);
 	fbJson.set(FIELD_ACCURATE, accurate);
-	fbJson.set(FIELD_SENSOR, sensor);
-	fbJson.set(FIELD_VERSION, version);
-	fbJson.set(FIELD_RANDOM, random);
-	fbJson.set(FIELD_MACHINE, MACHINE_ID);
-
 	// Send interaction data.
 	if (CHROME) paint(MESSAGES[SAVE], DELAY_MSG);
-	if (!TESTING) {
-		if (Firebase.setJSON(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
-			// @todo Save the timestamp.
-			// https://github.com/doublejosh/FortuneTeller/issues/2
-			// Firebase.pushTimestamp(__fbData, const String &path);
+	if (SAVING) {
+		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
 			printDebug("Ready.");
 			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
 		} else printDebug("SAVE ERROR");
 	} else {
 		printDebug("Save skipped for testing.");
 	}
-	// Clear data for the next user.
-	__interactionId = "";
-	fbJson.clear();
 }
 
 /**
  * Get fortune online based on chosen category.
  */
-void fetchFortune (const String category, double sensor, unsigned int version, uint16_t timeout) {
+void fetchFortune (const String category, uint16_t timeout) {
 	if (CHROME) play(APPEAR_FRAMES, 6);
 	paint(MESSAGES[FETCHING], DELAY_MSG);
 	printDebug("Fortune category: " + category);
+
 	// Fetch relevant fortunes.
 	QueryFilter query;
 	query.orderBy(FIELD_CATEGORY);
@@ -335,7 +363,7 @@ void fetchFortune (const String category, double sensor, unsigned int version, u
 			paint(MESSAGES[TIMEOUT], DELAY_MSG);
 		}
 		// Record full interaction data.
-		saveInteraction(atoi(fortuneId.c_str()), category, result, sensor, version, __randomChoice);
+		saveInteractionEnd(atoi(fortuneId.c_str()), result);
 
 	} else printDebug(__fbData.errorReason());
 	__fbData.clear();
@@ -365,7 +393,8 @@ void askQuestion (String id, unsigned int version) {
 	if (!questionFound) {
 		// @todo Get sensor reading.
 		double sensor = 123.456;
-		fetchFortune(id, sensor, version, QUESTION_TIMEOUT);
+		saveInteractionMiddle(id, sensor, version);
+		fetchFortune(id, QUESTION_TIMEOUT);
 		// @todo Handle no fortune.
 		return;
 	}
@@ -389,26 +418,6 @@ void askQuestion (String id, unsigned int version) {
 }
 
 /**
- * Create (almost) empty interaction event, for crash metrics.
- */
-void initSaveInteraction() {
-	__interactionId = String(random(100000000));
-	FirebaseJson fbJson;
-	fbJson.set(FIELD_MACHINE, MACHINE_ID);
-	if (!TESTING) {
-		if (Firebase.setJSON(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
-			// @todo Save the timestamp.
-			// https://github.com/doublejosh/FortuneTeller/issues/2
-			//pushTimestamp(__fbData, const String &path);
-			printDebug(F("Created interaction record."));
-			printDebug(__fbData.pushName());
-		} else printDebug("SAVE ERROR");
-	} else printDebug("Save skipped for testing.");
-
-	fbJson.clear();
-}
-
-/**
  * Kickoff new interaction.
  */
 void coin () {
@@ -424,9 +433,10 @@ void coin () {
 		// paint(MESSAGES[GREET3], DELAY_QUICK_MSG);
 	}
 	// Start question tree.
+	__interactionId = "";
 	__randomChoice = false;
 	String next = FIRST_QUESTION_ID;
-	initSaveInteraction();
+	saveInteractionInit();
 	askQuestion(next, 0);
 }
 
@@ -437,8 +447,6 @@ void rebootFortune () {
 	int len = sizeof(REBOOT_FORTUNES) / sizeof(REBOOT_FORTUNES[0]);
 	int pick = random(0, len);
 	__lcd.clear();
-	printDebug(String(len));
-	printDebug(String(pick));
 	wrapTxtToScreen(__lcd, REBOOT_FORTUNES[pick]);
 	delay(DELAY_FORTUNE);
 	txtToScreen(F("    Reconnecting"), DELAY_MSG, 1);
@@ -457,11 +465,29 @@ void sleep () {
 	delay(10);
 }
 
+/**
+ * Quickly try a series of critical actions.
+ */
+void runTests () {
+	if (!TESTING) return;
+	String tests[] = {"heart", "self", "wave", "health", "fortune"};
+	printDebug(F("Running fortune tests..."));
+	for (uint8_t t = 0; t < sizeof(tests)/sizeof(tests[0]); t++) {
+		saveInteractionInit();
+		delay(FAST_TIMEOUT);
+		saveInteractionMiddle("heart", 123.456, 3);
+		delay(FAST_TIMEOUT);
+		fetchFortune(tests[t], FAST_TIMEOUT);
+		printDebug(F(" "));
+		printDebug(F("- - - - - - - - - - - - - - - - - - - - - - -"));
+	}
+}
+
 
 // STANDARD...
 
 void setup (void) {
-	if (DEBUG) Serial.begin(1000000);
+	if (DEBUG) Serial.begin(SERIAL_RATE);
 	__lcd.begin(WIDTH, HEIGHT);
 	pinMode(TRIGGER_PIN, INPUT);
 	pinMode(BTN1_PULLUP, INPUT_PULLUP);
@@ -494,13 +520,7 @@ void setup (void) {
 
 	// Fetch and stash question data.
 	if (connect()) {
-		if (TESTING) {
-			printDebug("Running fortune tests...");
-			fetchFortune("heart", 123.00, 2, FAST_TIMEOUT);
-			fetchFortune("fate", 123.00, 2, FAST_TIMEOUT);
-			fetchFortune("health", 123.00, 2, FAST_TIMEOUT);
-			fetchFortune("fortune", 123.00, 2, FAST_TIMEOUT);
-		}
+		runTests();
 		fetchQuestions();
 		printDebug("Ready.");
 		paint(SLEEP_FRAMES[0], DELAY_NONE);
