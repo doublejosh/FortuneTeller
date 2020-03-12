@@ -475,7 +475,7 @@ void runTests () {
 	for (uint8_t t = 0; t < sizeof(tests)/sizeof(tests[0]); t++) {
 		saveInteractionInit();
 		delay(FAST_TIMEOUT);
-		saveInteractionMiddle("heart", 123.456, 3);
+		saveInteractionMiddle("heart", 123.456, 0);
 		delay(FAST_TIMEOUT);
 		fetchFortune(tests[t], FAST_TIMEOUT);
 		printDebug(F(" "));
