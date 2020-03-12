@@ -25,8 +25,7 @@ Arduino fortune teller, with real-world interaction metrics.
 - LCD Display 20x4
 - Potentiometer, resister
 - Arcade buttons
-- Jumpers
-- Breadboard
+- Coin slot switch
 
 ## Dependencies
 - [Firebase-ESP8266](https://github.com/mobizt/Firebase-ESP8266) (2.8.0)
