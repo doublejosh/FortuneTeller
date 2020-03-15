@@ -8,7 +8,6 @@
 		"typescript",
 		"typescriptreact"
 	],
-	"editor.formatOnSave": false,
-	"editor.autoIndent": "full",
-	"editor.tabSize": 4
+	"editor.formatOnSave": true,
+	"editor.autoIndent": "full"
 }
