@@ -28,10 +28,10 @@ const int displayRS = D5,
 
 // DATA STRUCTURE...
 
-String FORTUNES_PATH     = "/fortunes";
-String INTERACTIONS_PATH = "/interactions";
-String QUESTION_PATH     = "/questions";
-String FIRST_QUESTION_ID = "first";
+std::string FORTUNES_PATH     = "/fortunes";
+std::string INTERACTIONS_PATH = "/interactions";
+std::string QUESTION_PATH     = "/questions";
+std::string FIRST_QUESTION_ID = "first";
 
 char* FIELD_TEXT       = "text";
 char* FIELD_CATEGORY   = "category";
@@ -47,12 +47,15 @@ char* FIELD_RANDOM     = "random";
 char* FIELD_MACHINE    = "machine";
 char* FIELD_CREATED    = "created";
 
-String MACHINE_ID = "homegame";
+std::string MACHINE_ID = "homegame";
 
 // SETTINGS...
 
-bool CHROME = true;
-bool FREEPLAY = false;
+#define CHROME    true
+#define FREEPLAY  false
+#define DEBUG     false
+#define TESTING   false
+#define SAVING    true
 
 #define FORTUNE_INDEX_MAX 50
 #define FORTUNE_GET_MAX 15
@@ -72,9 +75,6 @@ uint16_t DELAY_NONE = 0,
        READ_TIMEOUT = 20000,
    WIFI_RETRY_DELAY = 3000;
 
-#define DEBUG true
-#define TESTING false
-#define SAVING true
 #define SERIAL_RATE 1000000
 #define FIREBASE_MAX_TRY 5
 #define FIREBASE_BUFFER_SIZE_SEND 2048
