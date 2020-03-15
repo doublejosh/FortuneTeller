@@ -33,6 +33,7 @@
 		"redux": "^4.0.5"
 	},
 	"devDependencies": {
+		"d3": "^5.15.0",
 		"eslint-config-prettier": "^6.10.0",
 		"eslint-plugin-react-hooks": "^2.3.0",
 		"prettier": "^1.19.1"
