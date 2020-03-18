@@ -289,7 +289,6 @@ void saveInteractionMiddle (const String category, double sensor, int version) {
 	if (SAVING) {
 		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
 			printDebug("Interaction data saved.");
-			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
 		} else printDebug("SAVE ERROR");
 	} else {
 		printDebug("Save skipped for testing.");
