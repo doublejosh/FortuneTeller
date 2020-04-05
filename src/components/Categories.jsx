@@ -5,14 +5,6 @@ import Category from './Category'
 import Stats from './Stats'
 import { css } from 'glamor'
 
-let container = css({
-	margin: '2rem 1rem',
-})
-
-let categoryStyle = css({
-	marginTop: '2rem',
-})
-
 export default () => {
 	useFirebaseConnect(['categories', 'fortunes'])
 	const categories = useSelector(state => state.firebase.data.categories)
@@ -21,7 +13,7 @@ export default () => {
 	return (
 		<React.Fragment>
 			<Stats fortunes={fortunes} />
-			<section {...container}>
+			<section {...css({ margin: '2rem 1rem' })}>
 				{categories &&
 					categories.map((category, i) => {
 						return (
@@ -29,7 +21,7 @@ export default () => {
 								key={category.id}
 								{...category}
 								fortunes={fortunes}
-								style={categoryStyle}
+								style={css({ marginTop: '2rem' })}
 							/>
 						)
 					})}

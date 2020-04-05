@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useFirebaseConnect } from 'react-redux-firebase'
+import firebase from '../firebaseConfigs'
 import { css } from 'glamor'
 
 import yesIcon from '../static/img/check.svg'
@@ -9,14 +10,8 @@ import noIcon from '../static/img/close.svg'
 export const Vote = props => {
 	const label = props.value > 0 ? 'Yes' : 'No'
 
-	const handleVote = e => {
-		props.forceRefresh({})
-		console.log('VOTE' + label)
-		e.currentTarget.blur()
-	}
-
 	return (
-		<button onClick={handleVote} {...props}>
+		<button onClick={props.onClick} {...props}>
 			<img src={props.value > 0 ? yesIcon : noIcon} alt={label} /> <span>{label}</span>
 		</button>
 	)
@@ -27,12 +22,40 @@ export default () => {
 
 	useFirebaseConnect(['fortunes'])
 	let fortunes = useSelector(state => state.firebase.data.fortunes) || []
-	fortunes = fortunes.filter(x => x)
-	const selected = fortunes[Math.floor(Math.random() * fortunes.length)]
+	fortunes = fortunes
+		.map((m, i) => {
+			return { ...m, id: i }
+		})
+		.filter(x => x)
 
 	const [forced, forceRefresh] = useState(true)
 
+	const selected = fortunes[Math.floor(Math.random() * fortunes.length)]
+
+	const handleVote = e => {
+		firebase
+			.database()
+			.ref()
+			.update({
+				[`/fortunes/${selected.id}/rank/total`]: selected.rank ? selected.rank.total + 1 : 1,
+			})
+
+		if (parseInt(e.currentTarget.value) === 1) {
+			firebase
+				.database()
+				.ref()
+				.update({
+					[`/fortunes/${selected.id}/rank/keep`]: selected.rank
+						? selected.rank.keep + parseInt(e.currentTarget.value)
+						: 1,
+				})
+		}
+		forceRefresh(!forced)
+		//e.currentTarget.blur()
+	}
+
 	const voteBtn = css({
+		fontFamily: `'VT323', Roboto, Helvetica, Arial, sans-serif`,
 		textAlign: 'center',
 		fontSize: '3rem',
 		padding: '1rem 2rem',
@@ -70,7 +93,7 @@ export default () => {
 				minHeight: '100%',
 				padding: '0 1rem',
 			})}>
-			{fortunes.length ? (
+			{fortunes.length && selected ? (
 				<React.Fragment>
 					<div
 						{...selected}
@@ -93,17 +116,12 @@ export default () => {
 						<h2>{selected.text}</h2> {selected.score}
 					</div>
 
-					<Vote
-						value={1}
-						{...css({ gridArea: 'yes' })}
-						{...voteBtn}
-						onClick={() => forceRefresh(!forced)}
-					/>
+					<Vote value={1} {...css({ gridArea: 'yes' })} {...voteBtn} onClick={handleVote} />
 					<Vote
 						value={-1}
 						{...css({ gridArea: 'nope', '& img': { transform: 'scale(0.9)' } })}
 						{...voteBtn}
-						onClick={() => forceRefresh(!forced)}
+						onClick={handleVote}
 					/>
 				</React.Fragment>
 			) : (

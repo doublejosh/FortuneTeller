@@ -1,19 +1,11 @@
 import React, { useMemo } from 'react'
 import { css } from 'glamor'
+import { useSelector } from 'react-redux'
 //import BarChart from 'react-d3-components'
 
-let style = css({
-	fontSize: '2.5rem',
-	margin: '0 0 24rem 0',
-	color: 'rgba(0, 0, 0, 0.6)',
-	textAlign: 'center',
-	'@media (min-width: 600px)': {
-		textAlign: 'left',
-		margin: '0 0 6rem 0',
-	},
-})
-
 export default props => {
+	const theme = useSelector(state => state.theme) || []
+
 	let totals = { votes: 1, shown: 1 }
 	const findTotal = fortunes => {
 		let votes = 0,
@@ -40,13 +32,20 @@ export default props => {
 	// ]
 
 	return (
-		<section {...style}>
+		<section
+			{...css({
+				fontSize: '2.5rem',
+				margin: '0 0 24rem 0',
+				color: 'rgba(0, 0, 0, 0.6)',
+				textAlign: 'center',
+				[`@media(min-width: ${theme.breaks.md}px)`]: {
+					textAlign: 'left',
+					margin: '0 0 6rem 1rem',
+				},
+			})}>
 			<span {...css({ fontSize: '7rem' })}>
 				{totals.votes && totals.shown
-					? Math.round(
-							(parseInt(totals.votes) / parseInt(totals.shown)) *
-								100
-					  )
+					? Math.round((parseInt(totals.votes) / parseInt(totals.shown)) * 100)
 					: '??'}
 				%
 			</span>

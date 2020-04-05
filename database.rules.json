@@ -1,9 +1,14 @@
 {
-  "rules": {
-    ".read": true,
-    ".write": false,
-    "fortunes": {
-      ".indexOn": ["category", "votes"]
-    }
-  }
+	"rules": {
+		".read": true,
+		".write": false,
+		"fortunes": {
+			".indexOn": ["category", "votes"],
+			"$fortune": {
+				"rank": {
+					".write": true
+				}
+			}
+		}
+	}
 }
