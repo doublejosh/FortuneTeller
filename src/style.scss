@@ -1,126 +1,53 @@
 html {
+	height: 100%;
+}
+body,
+#root {
+	height: 100%;
+}
+body {
+	margin: 0;
+	padding: 0;
+	background: rgb(52, 75, 180);
+	color: #ddd;
+	font-family: 'VT323', Roboto, Helvetica, Arial, sans-serif;
 	font-size: 16px;
-
 	@media (min-width: 600px) {
 		font-size: 22px;
 	}
 }
-body {
-	background: rgb(52, 75, 180);
-	color: #ddd;
-	/* font-family: Roboto, Helvetica, Arial, sans-serif; */
-	font-family: 'VT323';
-	margin: 0;
-	padding: 0;
-}
 #root {
-	width: 94%;
 	max-width: 800px;
-	margin: 30px auto;
+	margin: 0 auto;
 }
 
-.category {
-	margin-bottom: 1rem;
+h2 {
+	margin-top: 0;
+}
 
-	h3 {
-		font-size: 1.75rem;
-		font-weight: normal;
-		color: #000;
-		padding: 0 0 1rem 3rem;
-		margin: 0;
-		background-repeat: no-repeat;
-		background-position: left bottom;
-		background-size: contain;
-
-		@media (min-width: 600px) {
-			padding-left: 3rem;
+a,
+button {
+	-webkit-tap-highlight-color: #fff;
+	&:active {
+		color: #fff;
+		& img {
+			filter: invert(100%);
+			-webkit-filter: invert(100%);
 		}
 	}
-
-	&.heart h3 {
-		background-image: url('./static/img/heart.svg');
-	}
-	&.fortune h3 {
-		background-image: url('./static/img/diamond.svg');
-	}
-	&.health h3 {
-		background-image: url('./static/img/skull.svg');
-	}
-	&.self h3 {
-		background-image: url('./static/img/eye.svg');
-	}
-	&.self h3 {
-		background-image: url('./static/img/eye.svg');
-	}
-	&.wave h3 {
-		background-image: url('./static/img/wave.svg');
-	}
-	.count-badge {
-		text-align: right;
-		margin-right: 0.5rem;
-		font-size: 1.5rem;
-		color: rgba(0, 0, 0, 0.6);
-	}
-
-	ul {
-		padding-left: 0;
-		margin: 0;
-
-		li {
-			padding: 0.5rem 0 0.5rem 0.5rem;
-			margin-bottom: 0.75rem;
-			box-shadow: -3px 3px 0px rgba(0, 0, 0, 0.4);
-			background: rgba(255, 255, 255, 0.1);
-			position: relative;
-			list-style-type: none;
-			margin-bottom: 0.5rem;
-
-			@media (min-width: 600px) {
-				padding: 0.75rem 0 0.75rem 0.75rem;
-				margin-bottom: 1rem;
+	@media (hover: hover) and (pointer: fine) {
+		&:hover {
+			color: #fff;
+			& img {
+				filter: invert(100%);
+				-webkit-filter: invert(100%);
 			}
-
-			p {
-				position: relative;
-				z-index: 10;
-				margin: 0;
-				font-size: 1.25rem;
-				padding-right: 4rem;
-				@media (min-width: 600px) {
-					padding-right: 235px;
-				}
-			}
-			.data {
-				margin-top: 0.5rem;
-				font-size: 0.75rem;
-				font-weight: 100;
-				color: #000;
-			}
-
-			.score-badge {
-				position: absolute;
-				right: 0;
-				top: 0;
-				height: 100%;
-				background: linear-gradient(
-					90deg,
-					rgba(36, 58, 158, 0.5) 0%,
-					rgb(36, 58, 158) 100%
-				);
-				text-align: right;
-				display: flex;
-				align-items: center;
-				justify-content: flex-end;
-
-				.number {
-					color: #000;
-					font-size: 1.5rem;
-					padding: 0 1rem;
-				}
-			}
-			.score-badge.low-score {
-				color: rgba(0, 0, 0, 0.3);
-				background: none;
+		}
+		&:active {
+			color: #000;
+			& img {
+				filter: invert(0%);
+				-webkit-filter: invert(0%);
 			}
 		}
 	}

@@ -3,6 +3,15 @@ import { useSelector } from 'react-redux'
 import { useFirebaseConnect } from 'react-redux-firebase'
 import Category from './Category'
 import Stats from './Stats'
+import { css } from 'glamor'
+
+let container = css({
+	margin: '2rem 1rem',
+})
+
+let categoryStyle = css({
+	marginTop: '2rem',
+})
 
 export default () => {
 	useFirebaseConnect(['categories', 'fortunes'])
@@ -12,7 +21,7 @@ export default () => {
 	return (
 		<React.Fragment>
 			<Stats fortunes={fortunes} />
-			<section className="categories">
+			<section {...container}>
 				{categories &&
 					categories.map((category, i) => {
 						return (
@@ -20,6 +29,7 @@ export default () => {
 								key={category.id}
 								{...category}
 								fortunes={fortunes}
+								style={categoryStyle}
 							/>
 						)
 					})}

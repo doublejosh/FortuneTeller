@@ -41,7 +41,7 @@ let style = css({
 })
 
 export default () => (
-	<section className={style}>
+	<section {...style}>
 		<h1>FORTUNE Calibrator</h1>
 		<h1>FORTUNE Calibrator</h1>
 		<h1>FORTUNE Calibrator</h1>

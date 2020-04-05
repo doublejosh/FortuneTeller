@@ -34,7 +34,7 @@ let style = css({
 })
 
 export default () => (
-	<section className={style}>
+	<section {...style}>
 		<ul>
 			{links &&
 				links.map((l, i) => (
