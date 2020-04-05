@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useFirebaseConnect } from 'react-redux-firebase'
+import { useFirebaseConnect, isEmpty } from 'react-redux-firebase'
 import firebase from '../firebaseConfigs'
 import { css } from 'glamor'
 
@@ -9,7 +9,6 @@ import noIcon from '../static/img/close.svg'
 
 export const Vote = props => {
 	const label = props.value > 0 ? 'Yes' : 'No'
-
 	return (
 		<button onClick={props.onClick} {...props}>
 			<img src={props.value > 0 ? yesIcon : noIcon} alt={label} /> <span>{label}</span>
@@ -20,17 +19,44 @@ export const Vote = props => {
 export default () => {
 	const theme = useSelector(state => state.theme) || []
 
-	useFirebaseConnect(['fortunes'])
-	let fortunes = useSelector(state => state.firebase.data.fortunes) || []
-	fortunes = fortunes
-		.map((m, i) => {
-			return { ...m, id: i }
+	useFirebaseConnect([
+		{
+			path: 'fortunes',
+			storeAs: 'fortunesLowVotes',
+			queryParams: ['orderByChild=rank/total', 'limitToFirst=3'],
+		},
+	])
+	const fortunesLowVotes = useSelector(state => state.firebase.data.fortunesLowVotes) || []
+
+	let selected = false
+	let fortunes = []
+
+	if (isEmpty(fortunesLowVotes)) {
+		console.log('Loading...')
+	} else {
+		Object.keys(fortunesLowVotes).forEach((k, i) => {
+			fortunes.push({ ...fortunesLowVotes[k], id: k })
 		})
-		.filter(x => x)
+
+		selected = fortunes[Math.floor(Math.random() * fortunes.length)]
+	}
 
 	const [forced, forceRefresh] = useState(true)
 
-	const selected = fortunes[Math.floor(Math.random() * fortunes.length)]
+	// let data = false
+	// let fortunesLowVotes = useMemo(
+	// 	() =>
+	// 		firebase
+	// 			.database()
+	// 			.ref('fortunes')
+	// 			.orderByChild('rank/total')
+	// 			.limitToFirst(3)
+	// 			.once('value')
+	// 			.then(snapshot => {
+	// 				data = snapshot.val()
+	// 			}),
+	// 	[data]
+	// )
 
 	const handleVote = e => {
 		firebase

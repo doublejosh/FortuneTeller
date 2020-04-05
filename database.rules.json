@@ -3,7 +3,7 @@
 		".read": true,
 		".write": false,
 		"fortunes": {
-			".indexOn": ["category", "votes"],
+			".indexOn": ["category", "votes", "rank/total"],
 			"$fortune": {
 				"rank": {
 					".write": true
