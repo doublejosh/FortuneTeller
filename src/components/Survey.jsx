@@ -45,9 +45,8 @@ export default () => {
 				.database()
 				.ref()
 				.update({
-					[`/fortunes/${selected.id}/rank/keep`]: selected.rank
-						? selected.rank.keep + parseInt(e.currentTarget.value)
-						: 1,
+					[`/fortunes/${selected.id}/rank/keep`]:
+						selected.rank && selected.rank.keep ? selected.rank.keep + 1 : 1,
 				})
 		}
 		forceRefresh(!forced)
