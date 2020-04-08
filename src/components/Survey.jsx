@@ -7,12 +7,41 @@ import { css } from 'glamor'
 import yesIcon from '../static/img/check.svg'
 import noIcon from '../static/img/close.svg'
 
+const SAVING = false
+const THANKS_DELAY = 1500
+
 export const Vote = props => {
 	const label = props.value > 0 ? 'Yes' : 'No'
 	return (
 		<button onClick={props.onClick} {...props}>
 			<img src={props.value > 0 ? yesIcon : noIcon} alt={label} /> <span>{label}</span>
 		</button>
+	)
+}
+
+export const Thanks = () => {
+	const theme = useSelector(state => state.theme) || []
+	return (
+		<div
+			{...css({
+				position: 'absolute',
+				top: '3%',
+				left: '3%',
+				width: '94%',
+				height: '50%',
+				[`@media(min-width: ${theme.breaks.md}px)`]: {
+					height: '40%',
+				},
+				display: 'flex',
+				alignItems: 'center',
+				background: 'rgba(255, 255, 255, 0.8)',
+				color: '#000',
+				borderRadius: `${theme.borderRadius}`,
+				fontSize: '5rem',
+				justifyContent: 'center',
+			})}>
+			<h3>Got it.</h3>
+		</div>
 	)
 }
 
@@ -41,42 +70,31 @@ export default () => {
 		selected = fortunes[Math.floor(Math.random() * fortunes.length)]
 	}
 
-	const [forced, forceRefresh] = useState(true)
-
-	// let data = false
-	// let fortunesLowVotes = useMemo(
-	// 	() =>
-	// 		firebase
-	// 			.database()
-	// 			.ref('fortunes')
-	// 			.orderByChild('rank/total')
-	// 			.limitToFirst(3)
-	// 			.once('value')
-	// 			.then(snapshot => {
-	// 				data = snapshot.val()
-	// 			}),
-	// 	[data]
-	// )
+	const [forced, forceRefresh] = useState(false)
 
 	const handleVote = e => {
-		firebase
-			.database()
-			.ref()
-			.update({
-				[`/fortunes/${selected.id}/rank/total`]: selected.rank ? selected.rank.total + 1 : 1,
-			})
-
-		if (parseInt(e.currentTarget.value) === 1) {
+		if (SAVING) {
 			firebase
 				.database()
 				.ref()
 				.update({
-					[`/fortunes/${selected.id}/rank/keep`]:
-						selected.rank && selected.rank.keep ? selected.rank.keep + 1 : 1,
+					[`/fortunes/${selected.id}/rank/total`]: selected.rank ? selected.rank.total + 1 : 1,
 				})
+
+			if (parseInt(e.currentTarget.value) === 1) {
+				firebase
+					.database()
+					.ref()
+					.update({
+						[`/fortunes/${selected.id}/rank/keep`]:
+							selected.rank && selected.rank.keep ? selected.rank.keep + 1 : 1,
+					})
+			}
 		}
-		forceRefresh(!forced)
-		//e.currentTarget.blur()
+		forceRefresh(true)
+		setTimeout(() => {
+			forceRefresh(false)
+		}, THANKS_DELAY)
 	}
 
 	const voteBtn = css({
@@ -88,7 +106,7 @@ export default () => {
 		[`@media(min-width: ${theme.breaks.md}px)`]: {
 			margin: '1rem 3rem',
 		},
-		borderRadius: '10rem',
+		borderRadius: theme.borerRadius,
 		background: 'rgba(255, 255, 255, .05)',
 		color: '#000',
 		lineHeight: '1.5rem',
@@ -148,6 +166,7 @@ export default () => {
 						{...voteBtn}
 						onClick={handleVote}
 					/>
+					{forced && <Thanks />}
 				</React.Fragment>
 			) : (
 				<h4>Loading</h4>

@@ -4,21 +4,23 @@ import Logo from './Logo'
 import Categories from './Categories'
 import Links from './Links'
 import Survey from './Survey'
+import Test from './Test'
 import '../style.scss'
 
-export default () => {
-	return (
-		<Router>
-			<Switch>
-				<Route path="/vote">
-					<Survey />
-				</Route>
-				<Route path="/">
-					<Logo />
-					<Categories />
-					<Links />
-				</Route>
-			</Switch>
-		</Router>
-	)
-}
+export default () => (
+	<Router>
+		<Switch>
+			<Route path="/vote">
+				<Survey />
+			</Route>
+			<Route path="/test">
+				<Test />
+			</Route>
+			<Route path="/">
+				<Logo />
+				<Categories />
+				<Links />
+			</Route>
+		</Switch>
+	</Router>
+)
