@@ -1,0 +1,158 @@
+{
+	"categories": [
+		{
+			"id": "heart",
+			"label": "Matters of the Heart"
+		},
+		{
+			"id": "fortune",
+			"label": "Fortune & Fame"
+		},
+		{
+			"id": "health",
+			"label": "Health & Wellbeing"
+		},
+		{
+			"id": "wave",
+			"label": "Fate Washes Over You"
+		},
+		{
+			"id": "self",
+			"label": "Fate is What You Make"
+		}
+	],
+	"questions": {
+		"abstract": {
+			"nextNo": "fate",
+			"nextYes": "heart",
+			"text": "Is there love in this story?",
+			"version": 1
+		},
+		"concrete": {
+			"nextNo": "health",
+			"nextYes": "fortune",
+			"text": "Can you go without it?",
+			"version": 1
+		},
+		"fate": {
+			"nextNo": "self",
+			"nextYes": "wave",
+			"text": "Does the wind carry the tune?",
+			"version": 1
+		},
+		"first": {
+			"nextNo": "abstract",
+			"nextYes": "concrete",
+			"text": "Thinking about something rational?",
+			"version": 1
+		}
+	},
+	"fortunes": {
+		"2": {
+			"category": "fortune",
+			"text": "Yes, you can totally get rich, if you   want."
+		},
+		"3": {
+			"category": "health",
+			"text": "You will get the    butt pats you       deserve."
+		},
+		"4": {
+			"category": "health",
+			"text": "Ultimately it's     going to come down  to your reliability."
+		},
+		"5": {
+			"category": "heart",
+			"text": "Listen, when you're told that you're    cared about."
+		},
+		"6": {
+			"category": "self",
+			"text": "You're about to     notice what you're  actually hunting."
+		},
+		"7": {
+			"category": "health",
+			"text": "Taking care of      yourself will indeed help."
+		},
+		"8": {
+			"category": "heart",
+			"text": "Turns out they all  like you after all."
+		},
+		"9": {
+			"category": "wave",
+			"text": "The wildness of     chaos will call you."
+		},
+		"10": {
+			"category": "fortune",
+			"text": "Money will pursue   you."
+		},
+		"11": {
+			"category": "wave",
+			"text": "You're full of      nonsense."
+		},
+		"12": {
+			"category": "heart",
+			"text": "Watch as a fresh    force of life       crosses your path soon."
+		},
+		"13": {
+			"category": "health",
+			"text": "That present you're giving yourself will arrive soon."
+		},
+		"14": {
+			"category": "wave",
+			"text": "Well, it's time to  embrace a new       narrative."
+		},
+		"15": {
+			"category": "fortune",
+			"text": "Great, you set      yourself up to get  that thing you love."
+		},
+		"16": {
+			"category": "self",
+			"text": "You're about to     finally find time to finish that one thing."
+		},
+		"17": {
+			"category": "heart",
+			"text": "It's not your job   to fix people!"
+		},
+		"19": {
+			"category": "heart",
+			"text": "Love yourself hard. Please."
+		},
+		"20": {
+			"category": "health",
+			"text": "Your awareness of   time is a gift."
+		},
+		"21": {
+			"category": "fortune",
+			"text": "Yes, you can tap    into your magic."
+		},
+		"22": {
+			"category": "fortune",
+			"text": "A pleasant surprise is waiting...       pounce."
+		},
+		"23": {
+			"category": "self",
+			"text": "Make a wish, you're about to make a     decision!"
+		},
+		"24": {
+			"category": "heart",
+			"text": "Their version will  end up in your      head. Sorry."
+		},
+		"25": {
+			"category": "fortune",
+			"text": "Maybe it doesn't    matter enough to    worry about."
+		},
+		"26": {
+			"category": "wave",
+			"text": "Ok then, your wish  is granted."
+		},
+		"1001": {
+			"text": "You could give into sadness, but you're more interesting than that."
+		},
+		"1002": {
+			"text": "You'll soon realize you're more capable than admitting it."
+		},
+		"-M4N89n59IZIJ6JwbDz0": {
+			"text": "The beliefs closing your mind will soon open with wonder."
+		}
+	},
+	"interactions": {}
+}
