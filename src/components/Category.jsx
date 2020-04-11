@@ -17,8 +17,6 @@ export default props => {
 	let totalShown = 0,
 		totalVotes = 0
 
-	console.log(props.css)
-
 	return (
 		<section
 			{...css({
@@ -32,41 +30,43 @@ export default props => {
 			className={props.id}>
 			<h3
 				{...css({
-					fontSize: '1.75rem',
+					fontSize: '2rem',
 					fontWeight: 'normal',
 					color: '#000',
-					padding: '0 0 1rem 3rem',
 					margin: '0',
 					backgroundRepeat: 'no-repeat',
 					backgroundPosition: 'left bottom',
 					backgroundSize: 'contain',
+					padding: '.25rem 0 1rem 3rem',
 					'@media (min-width: 600px)': {
-						paddingLeft: '3rem',
+						fontSize: '3rem',
+						paddingLeft: '4rem',
 					},
 				})}>
 				{props.label}
 			</h3>
 			<ul {...css({ paddingLeft: '0', margin: '0' })}>
-				{props.fortunes &&
-					props.fortunes
-						.filter(f => f.category === props.id)
-						.map(f => ({ ...f, score: getScore(f.votes, f.shown) }))
-						.sort((a, b) => b.score - a.score)
-						.map((f, i) => {
-							totalShown += f.shown
-							totalVotes += f.votes
-							return <Fortune key={i} {...f} />
-						})}
+				{props.fortunes
+					.filter(f => f.category === props.id)
+					.map(f => ({ ...f, score: getScore(f.votes, f.shown) }))
+					.sort((a, b) => b.score - a.score)
+					.map((f, i) => {
+						totalShown += f.shown
+						totalVotes += f.votes
+						return <Fortune key={i} {...f} />
+					})}
 			</ul>
 			<div
 				{...css({
 					textAlign: 'right',
 					marginRight: '0.5rem',
-					fontSize: '1.5rem',
+					fontSize: '2rem',
 					color: 'rgba(0, 0, 0, 0.6)',
 				})}>
-				{totalVotes}/{totalShown}
-				{' (' + Math.round((totalVotes / totalShown) * 100)}%)
+				({totalVotes}/{totalShown})&nbsp;
+				<span {...css({ color: '#000', fontSize: '4rem' })}>
+					{Math.round((totalVotes / totalShown) * 100)}%
+				</span>
 			</div>
 		</section>
 	)

@@ -1,4 +1,5 @@
 export default () => ({
+	font: `'VT323', Roboto, Helvetica, Arial, sans-serif`,
 	breaks: {
 		md: 600,
 	},

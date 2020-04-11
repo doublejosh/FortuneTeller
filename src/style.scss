@@ -25,6 +25,11 @@ h2 {
 	margin-top: 0;
 }
 
+button,
+textarea {
+	font-family: 'VT323', Roboto, Helvetica, Arial, sans-serif;
+}
+
 a,
 button {
 	-webkit-tap-highlight-color: #fff;
@@ -50,5 +55,29 @@ button {
 				-webkit-filter: invert(0%);
 			}
 		}
+	}
+}
+
+@keyframes blinkingText {
+	0% {
+		color: #fff;
+	}
+	49% {
+		color: #fff;
+	}
+	60% {
+		color: transparent;
+	}
+	99% {
+		color: transparent;
+	}
+	100% {
+		color: #fff;
+	}
+}
+
+@keyframes appearBreifly {
+	to {
+		visibility: visible;
 	}
 }

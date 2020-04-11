@@ -10,22 +10,27 @@ export default () => {
 	const categories = useSelector(state => state.firebase.data.categories)
 	const fortunes = useSelector(state => state.firebase.data.fortunes)
 
-	return (
+	const list = Object.keys(fortunes || {})
+		.filter(f => fortunes[f].hasOwnProperty('category'))
+		.map(f => ({ ...fortunes[f], key: f }))
+
+	return list ? (
 		<React.Fragment>
-			<Stats fortunes={fortunes} />
+			<Stats fortunes={list} />
 			<section {...css({ margin: '2rem 1rem' })}>
 				{categories &&
+					list &&
 					categories.map((category, i) => {
 						return (
 							<Category
 								key={category.id}
 								{...category}
-								fortunes={fortunes}
+								fortunes={list}
 								style={css({ marginTop: '2rem' })}
 							/>
 						)
 					})}
 			</section>
 		</React.Fragment>
-	)
+	) : null
 }

@@ -21,7 +21,7 @@ export default () => (
 		{...css({
 			'& ul': {
 				listStyle: 'none',
-				margin: '5rem 0 0 0',
+				margin: '5rem 0 2rem 0',
 				padding: 0,
 				textAlign: 'center',
 				'& li': {

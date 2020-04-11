@@ -38,6 +38,8 @@
 	"devDependencies": {
 		"eslint-config-prettier": "^6.10.0",
 		"eslint-plugin-react-hooks": "^2.3.0",
-		"prettier": "^1.19.1"
+		"firebase-tools": "^8.0.2",
+		"prettier": "^1.19.1",
+		"serve": "^11.3.0"
 	}
 }

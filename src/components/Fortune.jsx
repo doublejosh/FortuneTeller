@@ -27,7 +27,6 @@ export default f => {
 				background: 'rgba(255, 255, 255, 0.1)',
 				position: 'relative',
 				listStyleType: 'none',
-
 				'@media (min-width: 600px)': {
 					padding: '0.75rem 0 0.75rem 0.75rem',
 					marginBottom: '1rem',
@@ -38,7 +37,7 @@ export default f => {
 					position: 'relative',
 					zIndex: '10',
 					margin: '0',
-					fontSize: '1.25rem',
+					fontSize: '1.5rem',
 					paddingRight: '4rem',
 					'@media (min-width: 600px)': {
 						paddingRight: '235px',
@@ -74,7 +73,7 @@ export default f => {
 			<div
 				{...css({
 					marginTop: '0.5rem',
-					fontSize: '0.75rem',
+					fontSize: '1rem',
 					fontWeight: '100',
 					color: '#000',
 				})}>
