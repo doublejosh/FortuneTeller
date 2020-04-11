@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { useFirebaseConnect, isEmpty } from 'react-redux-firebase'
+import { useFirebaseConnect } from 'react-redux-firebase'
 import { css } from 'glamor'
 
 export default props => {
@@ -8,18 +8,6 @@ export default props => {
 	let fortunes = useSelector(state => state.firebase.data.fortunes)
 
 	const list = Object.keys(fortunes || {}).filter(f => fortunes[f].rank)
-
-	// .map(f => {
-	// 	fortunes[f].rank = {}
-	// 	fortunes[f].rank.keep = fortunes[f].rank.keep || 0
-
-	// 	return fortunes[f]
-	// })
-	// .sort(
-	// 	(a, b) =>
-	// 		fortunes[a].rank.keep / fortunes[a].rank.total -
-	// 		fortunes[b].rank.keep / fortunes[b].rank.total
-	// )
 
 	let total = 0
 
