@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import Logo from './Logo'
-import Categories from './Categories'
+import Categories from './Dashboard/Categories'
 import Links from './Links'
 import Vote from './Survey/Vote'
 import Add from './Survey/Add'

@@ -2,11 +2,11 @@ import React from 'react'
 import Fortune from './Fortune'
 import { css } from 'glamor'
 
-import heart from '../static/img/heart.svg'
-import diamond from '../static/img/diamond.svg'
-import skull from '../static/img/skull.svg'
-import eye from '../static/img/eye.svg'
-import wave from '../static/img/wave.svg'
+import heart from '../../static/img/heart.svg'
+import diamond from '../../static/img/diamond.svg'
+import skull from '../../static/img/skull.svg'
+import eye from '../../static/img/eye.svg'
+import wave from '../../static/img/wave.svg'
 
 export default props => {
 	const getScore = (votes, shown) => {

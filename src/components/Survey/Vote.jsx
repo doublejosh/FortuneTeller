@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { useFirebaseConnect, isEmpty } from 'react-redux-firebase'
+import { useFirebaseConnect, useFirebase, isEmpty } from 'react-redux-firebase'
 import firebase from '../../firebaseConfigs'
 import { css } from 'glamor'
 
@@ -33,7 +33,6 @@ export const Thanks = () => {
 				[`@media(min-width: ${theme.breaks.md}px)`]: {
 					height: '40%',
 				},
-				animation: 'appearBreifly 0s 2s forwards',
 				display: 'none',
 				//display: 'flex',
 				alignItems: 'center',
@@ -49,35 +48,56 @@ export const Thanks = () => {
 }
 
 export default () => {
+	const firebase = useFirebase()
+
+	console.log('RENDER ---------------------------------------------')
+
 	const prepRankable = list =>
 		Object.keys(list)
-			.filter(f => list[f].hasOwnProperty('rank'))
+			.filter(f => list[f])
 			.map(f => ({ ...list[f], key: f }))
 
-	useFirebaseConnect([
-		{
-			path: 'fortunes',
-			storeAs: 'fortunesLowVotes',
-			queryParams: ['orderByChild=rank/total', 'limitToFirst=3'],
-		},
-	])
+	// http://react-redux-firebase.com/docs/queries#types-of-queries
+	const query = {
+		type: 'once', // Avoid other user votes.
+		path: 'fortunes',
+		storeAs: 'fortunesLowVotes',
+		queryParams: ['orderByChild=rank/total', 'limitToFirst=1'],
+	}
+	useFirebaseConnect([query])
 
 	const fortunesLowVotes = useSelector(state => state.firebase.data.fortunesLowVotes)
+
 	const [selected, setSelected] = useState({})
+	const [force, forceUpdate] = useState(0)
+
+	console.log('RAW QUERY')
+	console.log(fortunesLowVotes)
 
 	useMemo(() => {
 		const list = prepRankable(fortunesLowVotes || {})
+
+		console.log('MEMOIZED LIST')
+		console.log(list)
+
 		setSelected(list.length ? list[Math.floor(Math.random() * list.length)] : {})
-	}, [fortunesLowVotes])
+	}, [fortunesLowVotes, force])
+
+	console.log('PICKED')
+	console.log(selected)
+
+	//useEffect(() => firebase.watchEvent('child_changed', 'fortunesLowVotes'))
 
 	const handleVote = (f, e) => {
+		console.log('CLICK ****************************************')
+
 		const btnVal = parseInt(e.currentTarget.value)
 		const nextKeep =
 			btnVal === 1
-				? f.rank.keep && f.rank.keep > 0
+				? f.rank && f.rank.keep && f.rank.keep > 0
 					? f.rank.keep + 1
 					: 1
-				: f.rank.keep
+				: f.rank && f.rank.keep
 				? f.rank.keep
 				: 0
 
@@ -96,6 +116,10 @@ export default () => {
 		document.getElementById('thanks').style.display = 'flex'
 		setTimeout(() => {
 			document.getElementById('thanks').style.display = 'none'
+			setSelected({})
+			forceUpdate(!force)
+			//firebase.watchEvent('once', 'fortunesLowVotes')
+			window.location.reload(false)
 		}, THANKS_DELAY)
 	}
 
