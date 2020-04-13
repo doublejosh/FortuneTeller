@@ -35,7 +35,7 @@ export default props => {
 		<section
 			{...css({
 				fontSize: '2.5rem',
-				margin: '0 0 24rem 0',
+				margin: '0 0 18rem 0',
 				color: 'rgba(0, 0, 0, 0.6)',
 				textAlign: 'center',
 				[`@media(min-width: ${theme.breaks.md}px)`]: {

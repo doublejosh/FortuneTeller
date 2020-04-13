@@ -17,6 +17,7 @@ export default () => {
 				padding: '2rem',
 			})}>
 			<textarea
+				id="fortune"
 				onChange={e => setFortune(e.target.value)}
 				rows="6"
 				{...css({
@@ -47,6 +48,7 @@ export default () => {
 							})
 					}
 					setFortune('')
+					document.getElementById('fortune').value = ''
 				}}
 				{...css({
 					gridArea: 'button',

@@ -2,7 +2,7 @@ import React from 'react'
 import { css } from 'glamor'
 import { useSelector } from 'react-redux'
 
-export default () => {
+export default props => {
 	const theme = useSelector(state => state.theme) || []
 
 	return (
@@ -10,7 +10,7 @@ export default () => {
 			{...css({
 				position: 'relative',
 				minHeight: '10rem',
-				margin: '10rem 2rem 6rem 2rem',
+				margin: '6rem 2rem 0 2rem',
 				[`@media(min-width: ${theme.breaks.md}px)`]: {
 					minHeight: '5rem',
 					margin: '1.75rem',
@@ -42,7 +42,8 @@ export default () => {
 					left: '-10px',
 					color: '#fff',
 				},
-			})}>
+			})}
+			{...css(props.css)}>
 			<h1>FORTUNE Calibrator</h1>
 			<h1>FORTUNE Calibrator</h1>
 			<h1>FORTUNE Calibrator</h1>

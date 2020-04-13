@@ -1,7 +1,6 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { useFirebaseConnect, useFirebase, isEmpty } from 'react-redux-firebase'
-import firebase from '../../firebaseConfigs'
 import { css } from 'glamor'
 
 import yesIcon from '../../static/img/check.svg'
@@ -19,29 +18,9 @@ export const Button = props => {
 	)
 }
 
-export const Thanks = () => {
-	const theme = useSelector(state => state.theme) || []
+export const Thanks = props => {
 	return (
-		<div
-			id="thanks"
-			{...css({
-				position: 'absolute',
-				top: '3%',
-				left: '3%',
-				width: '94%',
-				height: '50%',
-				[`@media(min-width: ${theme.breaks.md}px)`]: {
-					height: '40%',
-				},
-				display: 'none',
-				//display: 'flex',
-				alignItems: 'center',
-				background: 'rgba(255, 255, 255, 0.5)',
-				color: '#000',
-				borderRadius: `${theme.borderRadius}`,
-				fontSize: '5rem',
-				justifyContent: 'center',
-			})}>
+		<div id="thanks" {...css(props.css)}>
 			<h3>Got it.</h3>
 		</div>
 	)
@@ -49,8 +28,6 @@ export const Thanks = () => {
 
 export default () => {
 	const firebase = useFirebase()
-
-	console.log('RENDER ---------------------------------------------')
 
 	const prepRankable = list =>
 		Object.keys(list)
@@ -65,32 +42,15 @@ export default () => {
 		queryParams: ['orderByChild=rank/total', 'limitToFirst=1'],
 	}
 	useFirebaseConnect([query])
-
 	const fortunesLowVotes = useSelector(state => state.firebase.data.fortunesLowVotes)
-
 	const [selected, setSelected] = useState({})
-	const [force, forceUpdate] = useState(0)
-
-	console.log('RAW QUERY')
-	console.log(fortunesLowVotes)
-
+	const [force, forceUpdate] = useState()
 	useMemo(() => {
 		const list = prepRankable(fortunesLowVotes || {})
-
-		console.log('MEMOIZED LIST')
-		console.log(list)
-
 		setSelected(list.length ? list[Math.floor(Math.random() * list.length)] : {})
 	}, [fortunesLowVotes, force])
 
-	console.log('PICKED')
-	console.log(selected)
-
-	//useEffect(() => firebase.watchEvent('child_changed', 'fortunesLowVotes'))
-
 	const handleVote = (f, e) => {
-		console.log('CLICK ****************************************')
-
 		const btnVal = parseInt(e.currentTarget.value)
 		const nextKeep =
 			btnVal === 1
@@ -124,15 +84,7 @@ export default () => {
 	}
 
 	const theme = useSelector(state => state.theme) || []
-	const voteBtn = css({
-		fontFamily: `'VT323', Roboto, Helvetica, Arial, sans-serif`,
-		textAlign: 'center',
-		fontSize: '3rem',
-		padding: '1rem 2rem',
-		margin: '0 1rem',
-		[`@media(min-width: ${theme.breaks.md}px)`]: {
-			margin: '1rem 3rem',
-		},
+	const buttonStyle = css({
 		borderRadius: theme.borderRadius,
 		background: 'rgba(255, 255, 255, .05)',
 		color: '#000',
@@ -140,11 +92,24 @@ export default () => {
 		userSelect: 'none',
 		border: 'none',
 		outline: 0,
+		fontFamily: `'VT323', Roboto, Helvetica, Arial, sans-serif`,
+		textAlign: 'center',
+		fontSize: '3rem',
+		padding: '2rem',
+		margin: '0 1rem',
 		'& img': {
-			maxWidth: '5rem',
+			maxWidth: '4rem',
 		},
+		[`@media(min-width: ${theme.breaks.md}px)`]: {
+			margin: '1rem 3rem',
+			'& img': {
+				maxWidth: '5rem',
+			},
+		},
+
 		'& span': {
 			display: 'block',
+			marginTop: '.5rem',
 		},
 	})
 
@@ -156,9 +121,9 @@ export default () => {
                             "nope yes"
                             "space space"`,
 				gridTemplateColumns: '1fr 1fr',
-				gridTemplateRows: '65% 1fr 5%',
+				gridTemplateRows: '55% 1fr 10rem',
 				[`@media(min-width: ${theme.breaks.md}px)`]: {
-					gridTemplateRows: '50% 1fr 10%',
+					gridTemplateRows: '50% 1fr 15rem',
 				},
 				minHeight: '100%',
 				padding: '0 1rem',
@@ -173,7 +138,7 @@ export default () => {
 							alignItems: 'center',
 							justifyContent: 'center',
 							padding: '0 1rem',
-							fontSize: '2.25rem',
+							fontSize: '2rem',
 							[`@media(min-width: ${theme.breaks.md}px)`]: {
 								fontSize: '2rem',
 								padding: '0 2rem',
@@ -189,16 +154,36 @@ export default () => {
 					<Button
 						value={1}
 						{...css({ gridArea: 'yes' })}
-						{...voteBtn}
+						{...buttonStyle}
 						onClick={e => handleVote(selected, e)}
 					/>
 					<Button
 						value={-1}
-						{...css({ gridArea: 'nope', '& img': { transform: 'scale(0.9)' } })}
-						{...voteBtn}
+						{...css({ gridArea: 'nope' })}
+						{...buttonStyle}
 						onClick={e => handleVote(selected, e)}
 					/>
-					<Thanks id="thanks" />
+					<Thanks
+						id="thanks"
+						css={{
+							position: 'absolute',
+							top: '3%',
+							left: '3%',
+							width: '94%',
+							height: '50%',
+							[`@media(min-width: ${theme.breaks.md}px)`]: {
+								height: '40%',
+							},
+							display: 'none',
+							//display: 'flex',
+							alignItems: 'center',
+							background: 'rgba(255, 255, 255, 0.8)',
+							color: '#000',
+							borderRadius: `${theme.borderRadius}`,
+							fontSize: '5rem',
+							justifyContent: 'center',
+						}}
+					/>
 				</React.Fragment>
 			) : (
 				<h2

@@ -17,28 +17,30 @@ const links = [
 ]
 
 export default () => (
-	<section
-		{...css({
-			'& ul': {
+	<section>
+		<ul
+			{...css({
 				listStyle: 'none',
-				margin: '5rem 0 2rem 0',
+				margin: '5rem 0 10rem 0',
 				padding: 0,
 				textAlign: 'center',
-				'& li': {
-					display: 'inline',
-					marginRight: '2rem',
-				},
-			},
-			'& img': {
-				width: '40px',
-			},
-		})}>
-		<ul>
+			})}>
 			{links &&
-				links.map((l, i) => (
-					<li key={l.url}>
-						<a href={l.url} target="_blank" rel="noopener noreferrer">
-							<img src={l.img} alt={l.label} />
+				links.map((link, i) => (
+					<li
+						key={link.url}
+						{...css({
+							display: 'inline',
+							marginRight: '2rem',
+						})}>
+						<a href={link.url} target="_blank" rel="noopener noreferrer">
+							<img
+								src={link.img}
+								alt={link.label}
+								{...css({
+									width: '40px',
+								})}
+							/>
 						</a>
 					</li>
 				))}

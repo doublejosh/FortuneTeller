@@ -20,6 +20,7 @@ export default props => {
 	return (
 		<section
 			{...css({
+				marginBottom: '4rem',
 				'&.heart h3': { backgroundImage: `url(${heart})` },
 				'&.fortune h3': { backgroundImage: `url(${diamond})` },
 				'&.health h3': { backgroundImage: `url(${skull})` },
@@ -53,7 +54,7 @@ export default props => {
 					.map((f, i) => {
 						totalShown += f.shown
 						totalVotes += f.votes
-						return <Fortune key={i} {...f} />
+						return <Fortune key={i} f={f} />
 					})}
 			</ul>
 			<div
@@ -64,7 +65,7 @@ export default props => {
 					color: 'rgba(0, 0, 0, 0.6)',
 				})}>
 				({totalVotes}/{totalShown})&nbsp;
-				<span {...css({ color: '#000', fontSize: '4rem' })}>
+				<span {...css({ color: '#000', fontSize: '4rem', lineHeight: '3rem' })}>
 					{Math.round((totalVotes / totalShown) * 100)}%
 				</span>
 			</div>

@@ -2,3 +2,5 @@ configs.h
 .firebase
 node_modules
 build
+static/img/source
+.DS_Store

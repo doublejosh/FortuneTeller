@@ -4,11 +4,7 @@
 		".write": false,
 		"fortunes": {
 			".indexOn": ["category", "votes", "rank/total"],
-			"$fortune": {
-				"rank": {
-					".write": true
-				}
-			}
+			".write": true
 		}
 	}
 }
