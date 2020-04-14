@@ -38,10 +38,10 @@ export default () => {
 				left: 0,
 				width: '100%',
 				padding: '1rem 0 2rem 0',
-				fontSize: '1.25rem',
+				fontSize: '1rem',
 				[`@media(min-width: ${theme.breaks.menu}px)`]: {
-					fontSize: '1.5rem',
-					padding: '1rem 0',
+					fontSize: '2rem',
+					padding: '2rem 0',
 				},
 				backgroundColor: '#000000',
 				borderTop: `.25rem solid rgba(${theme.backgroundColor}, .7)`,
@@ -56,7 +56,7 @@ export default () => {
 								display: 'inline-block',
 								// paddingLeft: '1.5rem',
 								// marginLeft: '1.5rem',
-								borderLeft: '1px solid rgba(255, 255, 255, .2)',
+								borderLeft: `1px solid rgba(${theme.backgroundColor}, .3)`,
 								'&:nth-child(1)': {
 									paddingLeft: 0,
 									marginLeft: 0,
@@ -78,6 +78,9 @@ export default () => {
 									},
 									'&:active': {
 										color: '#FFF',
+										'& path': {
+											fill: '#FFF',
+										},
 										'& img': {
 											filter: 'invert(50%)',
 										},
@@ -85,12 +88,18 @@ export default () => {
 									'@media (hover: hover) and (pointer: fine)': {
 										'&:hover': {
 											color: '#FFF',
+											'& path': {
+												fill: '#FFF',
+											},
 											'& img': {
 												filter: 'invert(50%)',
 											},
 										},
 										'&:active': {
 											color: '#FFF',
+											'& path': {
+												fill: '#FFF',
+											},
 											'& img': {
 												filter: 'invert(50%)',
 											},
@@ -102,7 +111,7 @@ export default () => {
 										display: 'block',
 										margin: '0 auto .25rem auto',
 										height: '1.75rem',
-										maxWidth: '3rem',
+										maxWidth: '3.5rem',
 										'& path': {
 											fill: theme.background,
 										},

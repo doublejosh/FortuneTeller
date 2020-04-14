@@ -50,7 +50,7 @@ export default props => {
 				%
 			</p>
 			<p {...css({ padding: 0, margin: 0, lineHeight: '5rem' })}>accurate</p>
-			<p {...css({ padding: 0, margin: 0, lineHeight: 0 })}>
+			<p {...css({ padding: 0, margin: 0, lineHeight: 0, fontSize: '1.5rem' })}>
 				({totals.votes}/{totals.shown})
 			</p>
 			{/* <BarChart

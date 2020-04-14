@@ -12,20 +12,30 @@ export default props => {
 		<React.Fragment>
 			<img
 				src={chip}
-				{...css({ opacity: 0.3, width: '50%', margin: '3rem auto 0 auto', display: 'block' })}
+				{...css({
+					opacity: 0.3,
+					width: '40%',
+					margin: '2rem auto 0 auto',
+					display: 'block',
+					[`@media(min-width: ${theme.breaks.md}px)`]: {
+						margin: '2rem 0 1rem 0',
+						maxWidth: '10rem',
+					},
+				})}
 			/>
 			<section
 				{...css({
 					position: 'relative',
 					left: 8,
 					minHeight: '11rem',
-					margin: '0 2rem 0 2rem',
+					margin: '1rem auto 0 auto',
 					[`@media(min-width: ${theme.breaks.md}px)`]: {
 						minHeight: '5rem',
-						margin: '1.75rem',
+						margin: '0 0 2rem 0',
+						left: '1.5rem',
 					},
 					'& h1': {
-						fontSize: '4.5rem',
+						fontSize: '4.25rem',
 						fontWeight: 300,
 						lineHeight: '4rem',
 						margin: 0,

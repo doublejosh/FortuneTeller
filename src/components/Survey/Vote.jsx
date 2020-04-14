@@ -92,21 +92,27 @@ export default () => {
 		outline: 0,
 		fontFamily: `'VT323', Roboto, Helvetica, Arial, sans-serif`,
 		textAlign: 'center',
-		fontSize: '3rem',
-		padding: '2rem',
+		fontSize: '2.5rem',
 		margin: '0 1rem',
 		color: '#FFF',
+		padding: '1rem',
+		[`@media(min-width: ${theme.breaks.md}px)`]: {
+			padding: '2rem',
+			margin: '1rem 3rem',
+			fontSize: '3rem',
+			'& img': {
+				maxWidth: '5rem',
+			},
+		},
+		'& svg': {
+			maxWidth: '3rem',
+			maxHeight: '3rem',
+		},
 		'& path': {
 			fill: '#FFF',
 		},
 		'& img': {
 			maxWidth: '4rem',
-		},
-		[`@media(min-width: ${theme.breaks.md}px)`]: {
-			margin: '1rem 3rem',
-			'& img': {
-				maxWidth: '5rem',
-			},
 		},
 		'& span': {
 			display: 'block',
