@@ -29,6 +29,9 @@ export default ({ f, hideVotes }) => {
 					},
 				})}>
 				{f.text}
+				<span {...css({ marginLeft: '.5rem', fontSize: '1rem', opacity: 0.5 })}>
+					({f.rank && f.rank.total ? f.rank.total : 0})
+				</span>
 			</p>
 			<div
 				style={{ width: f.score > 10 ? f.score + '%' : '3.25rem' }}
@@ -44,13 +47,15 @@ export default ({ f, hideVotes }) => {
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'flex-end',
-					'& .number': {
+				})}>
+				<span
+					{...css({
 						color: '#000',
 						fontSize: '1.5rem',
 						padding: '0 1rem',
-					},
-				})}>
-				<span className="number">{f.score}%</span>
+					})}>
+					{f.score}%
+				</span>
 			</div>
 			{!hideVotes && (
 				<div

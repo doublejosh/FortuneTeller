@@ -31,7 +31,8 @@ export default props => {
 					<h3
 						{...css({
 							margin: 0,
-							color: 'rgba(0,0,0, .6)',
+							fontSize: '1.25rem',
+							color: 'rgba(0,0,0, .5)',
 							textAlign: 'right',
 							textTransform: 'uppercase',
 						})}>

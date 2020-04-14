@@ -43,14 +43,16 @@ export default props => {
 					margin: '0 0 6rem 1rem',
 				},
 			})}>
-			<span {...css({ fontSize: '7rem' })}>
+			<p {...css({ padding: 0, margin: 0, fontSize: '7rem', lineHeight: '1rem' })}>
 				{totals.votes && totals.shown
 					? Math.round((parseInt(totals.votes) / parseInt(totals.shown)) * 100)
 					: '??'}
 				%
-			</span>
-			<br />
-			accurate <br />({totals.votes}/{totals.shown})
+			</p>
+			<p {...css({ padding: 0, margin: 0, lineHeight: '5rem' })}>accurate</p>
+			<p {...css({ padding: 0, margin: 0, lineHeight: 0 })}>
+				({totals.votes}/{totals.shown})
+			</p>
 			{/* <BarChart
 				data={data}
 				width={400}

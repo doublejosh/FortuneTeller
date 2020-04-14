@@ -109,7 +109,7 @@ export default () => {
 										[`@media(min-width: ${theme.breaks.menu}px)`]: {
 											display: 'inline-block',
 											margin: '0 .5rem 0 0',
-											maxWidth: '4rem',
+											maxWidth: '3.5rem',
 										},
 									}}
 								/>

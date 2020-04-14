@@ -1,10 +1,8 @@
 import React, { useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { useFirebaseConnect, useFirebase, isEmpty } from 'react-redux-firebase'
+import { CheckCircle as IconCheckCircle, NoBox as IconNoBox } from '../Icons'
 import { css } from 'glamor'
-
-import yesIcon from '../../static/img/check.svg'
-import noIcon from '../../static/img/close.svg'
 
 const SAVING = true
 const THANKS_DELAY = 1500
@@ -13,7 +11,8 @@ export const Button = props => {
 	const label = props.value > 0 ? 'Yes' : 'No'
 	return (
 		<button onClick={props.onClick} {...props}>
-			<img src={props.value > 0 ? yesIcon : noIcon} alt={label} /> <span>{label}</span>
+			{props.value > 0 ? <IconCheckCircle /> : <IconNoBox />}
+			<span>{label}</span>
 		</button>
 	)
 }
@@ -87,7 +86,6 @@ export default () => {
 	const buttonStyle = css({
 		borderRadius: theme.borderRadius,
 		background: 'rgba(255, 255, 255, .05)',
-		color: '#000',
 		lineHeight: '1.5rem',
 		userSelect: 'none',
 		border: 'none',
@@ -97,6 +95,10 @@ export default () => {
 		fontSize: '3rem',
 		padding: '2rem',
 		margin: '0 1rem',
+		color: '#FFF',
+		'& path': {
+			fill: '#FFF',
+		},
 		'& img': {
 			maxWidth: '4rem',
 		},
@@ -106,7 +108,6 @@ export default () => {
 				maxWidth: '5rem',
 			},
 		},
-
 		'& span': {
 			display: 'block',
 			marginTop: '.5rem',
@@ -139,6 +140,7 @@ export default () => {
 							justifyContent: 'center',
 							padding: '0 1rem',
 							fontSize: '2rem',
+							lineHeight: '2.5rem',
 							[`@media(min-width: ${theme.breaks.md}px)`]: {
 								fontSize: '2rem',
 								padding: '0 2rem',
