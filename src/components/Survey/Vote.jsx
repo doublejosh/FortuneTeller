@@ -7,6 +7,11 @@ import { css } from 'glamor'
 const SAVING = true
 const THANKS_DELAY = 1500
 
+export default () => {
+	const [force, forceUpdate] = useState(false)
+	return <Approve forceRefresh={() => forceUpdate(!force)} things="stuff" />
+}
+
 export const Button = props => {
 	const label = props.value > 0 ? 'Yes' : 'No'
 	return (
@@ -25,7 +30,7 @@ export const Thanks = props => {
 	)
 }
 
-export default () => {
+export const Approve = props => {
 	const firebase = useFirebase()
 
 	const prepRankable = list =>
@@ -43,13 +48,13 @@ export default () => {
 	useFirebaseConnect([query])
 	const fortunesLowVotes = useSelector(state => state.firebase.data.fortunesLowVotes)
 	const [selected, setSelected] = useState({})
-	const [force, forceUpdate] = useState()
+
 	useMemo(() => {
 		const list = prepRankable(fortunesLowVotes || {})
 		setSelected(list.length ? list[Math.floor(Math.random() * list.length)] : {})
-	}, [fortunesLowVotes, force])
+	}, [fortunesLowVotes])
 
-	const handleVote = (f, e) => {
+	const handleVote = (f, e, refresh) => {
 		const btnVal = parseInt(e.currentTarget.value)
 		const nextKeep =
 			btnVal === 1
@@ -76,7 +81,7 @@ export default () => {
 		setTimeout(() => {
 			document.getElementById('thanks').style.display = 'none'
 			setSelected({})
-			forceUpdate(!force)
+			refresh()
 			//firebase.watchEvent('once', 'fortunesLowVotes')
 			window.location.reload(false)
 		}, THANKS_DELAY)
@@ -95,6 +100,30 @@ export default () => {
 		fontSize: '2.5rem',
 		margin: '0 1rem',
 		color: '#FFF',
+		tapHighlightColor: '#000',
+		'&:active': {
+			color: '#000',
+			'& path': {
+				fill: '#000',
+			},
+			background: 'rgba(255, 255, 255, .1)',
+		},
+		'@media (hover: hover) and (pointer: fine)': {
+			'&:hover': {
+				color: theme.background,
+				'& path': {
+					fill: theme.background,
+				},
+				background: 'rgba(255, 255, 255, .7)',
+			},
+			'&:active': {
+				color: '#000',
+				'& path': {
+					fill: '#000',
+				},
+				background: 'rgba(255, 255, 255, 1)',
+			},
+		},
 		padding: '1rem',
 		[`@media(min-width: ${theme.breaks.md}px)`]: {
 			padding: '2rem',
@@ -107,6 +136,10 @@ export default () => {
 		'& svg': {
 			maxWidth: '3rem',
 			maxHeight: '3rem',
+			[`@media(min-width: ${theme.breaks.md}px)`]: {
+				maxWidth: '6rem',
+				maxHeight: '6rem',
+			},
 		},
 		'& path': {
 			fill: '#FFF',
@@ -163,13 +196,13 @@ export default () => {
 						value={1}
 						{...css({ gridArea: 'yes' })}
 						{...buttonStyle}
-						onClick={e => handleVote(selected, e)}
+						onClick={e => handleVote(selected, e, props.forceRefresh)}
 					/>
 					<Button
 						value={-1}
 						{...css({ gridArea: 'nope' })}
 						{...buttonStyle}
-						onClick={e => handleVote(selected, e)}
+						onClick={e => handleVote(selected, e, props.forceRefresh)}
 					/>
 					<Thanks
 						id="thanks"

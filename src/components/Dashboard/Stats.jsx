@@ -40,17 +40,17 @@ export default props => {
 				textAlign: 'center',
 				[`@media(min-width: ${theme.breaks.md}px)`]: {
 					textAlign: 'left',
-					margin: '0 0 6rem 1rem',
+					margin: '0 0 14rem 1rem',
 				},
 			})}>
-			<p {...css({ padding: 0, margin: 0, fontSize: '7rem', lineHeight: '1rem' })}>
+			<p {...css({ padding: 0, margin: 0, fontSize: '7rem', lineHeight: '2rem' })}>
 				{totals.votes && totals.shown
 					? Math.round((parseInt(totals.votes) / parseInt(totals.shown)) * 100)
 					: '??'}
 				%
 			</p>
-			<p {...css({ padding: 0, margin: 0, lineHeight: '5rem' })}>accurate</p>
-			<p {...css({ padding: 0, margin: 0, lineHeight: 0, fontSize: '1.5rem' })}>
+			<p {...css({ padding: 0, margin: 0, lineHeight: '4rem', opacity: 0.6 })}>accurate</p>
+			<p {...css({ padding: 0, margin: 0, lineHeight: 0, fontSize: '1.5rem', opacity: 0.6 })}>
 				({totals.votes}/{totals.shown})
 			</p>
 			{/* <BarChart

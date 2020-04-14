@@ -54,7 +54,7 @@ export default ({ f, hideVotes }) => {
 						fontSize: '1.5rem',
 						padding: '0 1rem',
 					})}>
-					{f.score}%
+					{Math.round(f.score)}%
 				</span>
 			</div>
 			{!hideVotes && (

@@ -2,8 +2,8 @@ import React from 'react'
 import { css } from 'glamor'
 import { useSelector } from 'react-redux'
 
-import origami from '../static/img/origami.svg'
 import chip from '../static/img/chip.svg'
+import robot from '../static/img/robot.svg'
 
 export default props => {
 	const theme = useSelector(state => state.theme) || []
@@ -11,23 +11,25 @@ export default props => {
 	return (
 		<React.Fragment>
 			<img
-				src={chip}
+				src={robot}
 				{...css({
-					opacity: 0.3,
-					width: '40%',
+					position: 'relative',
+					left: '-.35rem',
+					opacity: 0.4,
+					width: '35%',
 					margin: '2rem auto 0 auto',
 					display: 'block',
 					[`@media(min-width: ${theme.breaks.md}px)`]: {
-						margin: '2rem 0 1rem 0',
-						maxWidth: '10rem',
+						margin: '2rem 0 1rem 1.5rem',
+						maxWidth: '8rem',
 					},
 				})}
 			/>
 			<section
 				{...css({
 					position: 'relative',
-					left: 8,
 					minHeight: '11rem',
+					maxWidth: '80%',
 					margin: '1rem auto 0 auto',
 					[`@media(min-width: ${theme.breaks.md}px)`]: {
 						minHeight: '5rem',
@@ -52,14 +54,14 @@ export default props => {
 					},
 					'& h1:nth-child(2)': {
 						position: 'absolute',
-						top: '-5px',
-						left: '-5px',
+						top: -5,
+						left: -5,
 						color: 'rgba(0, 0, 0, 0.7)',
 					},
 					'& h1:nth-child(3)': {
 						position: 'absolute',
-						top: '-10px',
-						left: '-10px',
+						top: -10,
+						left: -10,
 						color: '#fff',
 					},
 				})}

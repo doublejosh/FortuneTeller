@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { useFirebaseConnect } from 'react-redux-firebase'
+import { useFirebaseConnect, isEmpty } from 'react-redux-firebase'
 import Fortune from '../Dashboard/Fortune'
 import { css } from 'glamor'
 
@@ -22,7 +22,9 @@ export default props => {
 		})
 		.sort((a, b) => b.score - a.score)
 
-	let total = 0
+	const total = !isEmpty(list) ? list.reduce((total, f) => total + f.rank.total, 0) : 0
+
+	window.fortunes = list
 
 	return (
 		<section {...css({ margin: '1rem' })}>

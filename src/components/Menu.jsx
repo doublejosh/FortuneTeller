@@ -1,6 +1,7 @@
 import React from 'react'
 import { css } from 'glamor'
 import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
 import { BrainChart, Check, Ratings, Plus } from './Icons'
 
 const links = [
@@ -56,15 +57,15 @@ export default () => {
 								display: 'inline-block',
 								// paddingLeft: '1.5rem',
 								// marginLeft: '1.5rem',
-								borderLeft: `1px solid rgba(${theme.backgroundColor}, .3)`,
+								borderLeft: `1px solid rgba(${theme.backgroundColor}, .4)`,
 								'&:nth-child(1)': {
 									paddingLeft: 0,
 									marginLeft: 0,
 									borderLeft: 'none',
 								},
 							})}>
-							<a
-								href={link.url}
+							<Link
+								to={link.url}
 								{...css({
 									textDecoration: 'none',
 									textTransform: 'uppercase',
@@ -124,7 +125,7 @@ export default () => {
 								/>
 
 								<span>{link.label}</span>
-							</a>
+							</Link>
 						</li>
 					))}
 			</ul>
