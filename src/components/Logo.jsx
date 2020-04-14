@@ -2,7 +2,7 @@ import React from 'react'
 import { css } from 'glamor'
 import { useSelector } from 'react-redux'
 
-import chip from '../static/img/chip.svg'
+//import chip from '../static/img/chip.svg'
 import robot from '../static/img/robot.svg'
 
 export default props => {
@@ -24,6 +24,7 @@ export default props => {
 						maxWidth: '8rem',
 					},
 				})}
+				alt="Fortune Calibrator"
 			/>
 			<section
 				{...css({

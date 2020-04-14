@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useHistory } from 'react-router'
 import { useSelector } from 'react-redux'
 import { useFirebaseConnect, useFirebase, isEmpty } from 'react-redux-firebase'
@@ -38,7 +38,7 @@ export default props => {
 		type: 'once', // Avoid other user votes.
 		path: 'fortunes',
 		storeAs: 'fortunesLowVotes',
-		queryParams: ['orderByChild=rank/total', 'limitToFirst=1'],
+		queryParams: ['orderByChild=rank/lastVote', 'limitToFirst=1'],
 	}
 	// http://react-redux-firebase.com/docs/queries#types-of-queries
 	useFirebaseConnect([query])
@@ -71,6 +71,7 @@ export default props => {
 					[`/fortunes/${selected.key}/rank`]: {
 						total: selected.rank ? selected.rank.total + 1 : 1,
 						keep: nextKeep,
+						lastVote: firebase.database.ServerValue.TIMESTAMP,
 					},
 				})
 		} else console.log('SAVING DISABLED')

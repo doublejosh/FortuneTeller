@@ -58,6 +58,9 @@ export default () => {
 								// paddingLeft: '1.5rem',
 								// marginLeft: '1.5rem',
 								borderLeft: `1px solid rgba(${theme.backgroundColor}, .4)`,
+								[`@media(min-width: ${theme.breaks.menu}px)`]: {
+									borderColor: `rgba(${theme.backgroundColor}, .8)`,
+								},
 								'&:nth-child(1)': {
 									paddingLeft: 0,
 									marginLeft: 0,

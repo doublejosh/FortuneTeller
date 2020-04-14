@@ -14,31 +14,19 @@ export default props => {
 			return {
 				...fortunes[f],
 				key: f,
-				score:
-					(fortunes[f].rank
-						? (fortunes[f].rank.keep ? fortunes[f].rank.keep : 0) /
-						  (fortunes[f].rank.total ? fortunes[f].rank.total : 1)
-						: 0) * 100,
+				rankVotes: fortunes[f].rank && fortunes[f].rank.total ? fortunes[f].rank.total : 0,
+				rankLastVote:
+					fortunes[f].rank && fortunes[f].rank.lastVote ? fortunes[f].rank.lastVote : 0,
+				score: 20,
 			}
 		})
-		// Key, new first.
 		.sort((a, b) => {
-			if (a.key.toString() < b.key.toString()) return -1
-			if (a.key.toString() > b.key.toString()) return 1
+			if (a.key.toString() > b.key.toString()) return -1
+			if (a.key.toString() < b.key.toString()) return 1
 			return 0
 		})
-		// Total votes.
-		.sort((a, b) => {
-			if (a.rank && a.rank.total) {
-				if (b.rank && b.rank.total) {
-					return b.rank.total - a.rank.total
-				}
-				return 1
-			}
-			return -1
-		})
-		// Final score.
-		.sort((a, b) => b.score - a.score)
+		.sort((a, b) => a.rankVotes - b.rankVotes)
+		.sort((a, b) => a.rankLastVote - b.rankLastVote)
 
 	const total = !isEmpty(list)
 		? list.reduce((total, f) => (f.rank && f.rank.total ? f.rank.total + total : total), 0)

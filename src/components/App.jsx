@@ -6,7 +6,8 @@ import Links from './Links'
 import Vote from './Survey/Vote'
 import Add from './Survey/Add'
 import Results from './Survey/Results'
-import Test from './Test'
+import VoteOrder from './Survey/VoteOrder'
+//import Test from './Test'
 import Menu from './Menu'
 import '../style.scss'
 
@@ -27,8 +28,8 @@ export default () => (
 				<Add />
 				<Menu />
 			</Route>
-			<Route path="/test">
-				<Test />
+			<Route path="/order">
+				<VoteOrder />
 				<Menu />
 			</Route>
 			<Route path="/">

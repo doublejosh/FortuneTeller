@@ -15,7 +15,7 @@ export default ({ f, hideVotes }) => {
 					padding: '0.75rem 0 0.75rem 0.75rem',
 					marginBottom: '1rem',
 				},
-				opacity: (f.score / 100) * 0.5 + 0.5,
+				opacity: (f.score / 100) * 0.35 + 0.65,
 			})}>
 			<p
 				{...css({
@@ -25,12 +25,13 @@ export default ({ f, hideVotes }) => {
 					fontSize: '1.5rem',
 					paddingRight: '4rem',
 					'@media (min-width: 600px)': {
-						paddingRight: '235px',
+						paddingRight: '6rem',
 					},
 				})}>
 				{f.text}
-				<span {...css({ marginLeft: '.5rem', fontSize: '1rem', opacity: 0.5 })}>
-					({f.rank && f.rank.total ? f.rank.total : 0})
+				<span {...css({ marginLeft: '.25rem', fontSize: '1rem', opacity: 0.5 })}>
+					{/* [{f.key}] */}({f.rank && f.rank.total ? f.rank.total : 0})
+					{/* [{f.rank && f.rank.lastVote ? f.rank.lastVote : 0}] */}
 				</span>
 			</p>
 			<div
