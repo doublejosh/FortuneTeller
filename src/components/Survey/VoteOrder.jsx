@@ -4,6 +4,10 @@ import { useFirebaseConnect, isEmpty } from 'react-redux-firebase'
 import Fortune from '../Dashboard/Fortune'
 import { css } from 'glamor'
 
+// Vote Order...
+// V1 - One at a time, pure vote recency.
+// V2 -  List of lowest voted-on (newest first), client loop.
+
 export default props => {
 	useFirebaseConnect(['fortunes'])
 	let fortunes = useSelector(state => state.firebase.data.fortunes)
