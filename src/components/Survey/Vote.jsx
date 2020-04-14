@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
+import { useHistory } from 'react-router'
 import { useSelector } from 'react-redux'
 import { useFirebaseConnect, useFirebase, isEmpty } from 'react-redux-firebase'
 import { CheckCircle as IconCheckCircle, NoBox as IconNoBox } from '../Icons'
@@ -6,11 +7,6 @@ import { css } from 'glamor'
 
 const SAVING = true
 const THANKS_DELAY = 1500
-
-export default () => {
-	const [force, forceUpdate] = useState(false)
-	return <Approve forceRefresh={() => forceUpdate(!force)} things="stuff" />
-}
 
 export const Button = props => {
 	const label = props.value > 0 ? 'Yes' : 'No'
@@ -30,7 +26,7 @@ export const Thanks = props => {
 	)
 }
 
-export const Approve = props => {
+export default props => {
 	const firebase = useFirebase()
 
 	const prepRankable = list =>
@@ -38,23 +34,25 @@ export const Approve = props => {
 			.filter(f => list[f])
 			.map(f => ({ ...list[f], key: f }))
 
-	// http://react-redux-firebase.com/docs/queries#types-of-queries
 	const query = {
 		type: 'once', // Avoid other user votes.
 		path: 'fortunes',
 		storeAs: 'fortunesLowVotes',
 		queryParams: ['orderByChild=rank/total', 'limitToFirst=1'],
 	}
+	// http://react-redux-firebase.com/docs/queries#types-of-queries
 	useFirebaseConnect([query])
 	const fortunesLowVotes = useSelector(state => state.firebase.data.fortunesLowVotes)
 	const [selected, setSelected] = useState({})
+
+	const history = useHistory()
 
 	useMemo(() => {
 		const list = prepRankable(fortunesLowVotes || {})
 		setSelected(list.length ? list[Math.floor(Math.random() * list.length)] : {})
 	}, [fortunesLowVotes])
 
-	const handleVote = (f, e, refresh) => {
+	const handleVote = (f, e) => {
 		const btnVal = parseInt(e.currentTarget.value)
 		const nextKeep =
 			btnVal === 1
@@ -81,9 +79,9 @@ export const Approve = props => {
 		setTimeout(() => {
 			document.getElementById('thanks').style.display = 'none'
 			setSelected({})
-			refresh()
+			history.go()
 			//firebase.watchEvent('once', 'fortunesLowVotes')
-			window.location.reload(false)
+			//window.location.reload(false)
 		}, THANKS_DELAY)
 	}
 
@@ -196,13 +194,13 @@ export const Approve = props => {
 						value={1}
 						{...css({ gridArea: 'yes' })}
 						{...buttonStyle}
-						onClick={e => handleVote(selected, e, props.forceRefresh)}
+						onClick={e => handleVote(selected, e)}
 					/>
 					<Button
 						value={-1}
 						{...css({ gridArea: 'nope' })}
 						{...buttonStyle}
-						onClick={e => handleVote(selected, e, props.forceRefresh)}
+						onClick={e => handleVote(selected, e)}
 					/>
 					<Thanks
 						id="thanks"

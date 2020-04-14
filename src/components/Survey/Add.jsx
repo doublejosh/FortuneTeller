@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import firebase from '../../firebaseConfigs'
 import { css } from 'glamor'
@@ -6,6 +6,12 @@ import { css } from 'glamor'
 export default () => {
 	const theme = useSelector(state => state.theme) || []
 	const [fortune, setFortune] = useState()
+
+	const inputRef = useRef(null)
+	useEffect(() => {
+		inputRef.current.focus()
+	})
+
 	return (
 		<div
 			{...css({
@@ -18,6 +24,7 @@ export default () => {
 			})}>
 			<textarea
 				id="fortune"
+				ref={inputRef}
 				onChange={e => setFortune(e.target.value)}
 				rows="6"
 				{...css({
