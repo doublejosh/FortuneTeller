@@ -3,8 +3,9 @@ import { useSelector } from 'react-redux'
 import { useFirebaseConnect, isEmpty } from 'react-redux-firebase'
 import Fortune from '../Dashboard/Fortune'
 import { css } from 'glamor'
+import { Link } from 'react-router-dom'
 
-export default props => {
+export default () => {
 	useFirebaseConnect(['fortunes'])
 	let fortunes = useSelector(state => state.firebase.data.fortunes)
 
@@ -87,6 +88,11 @@ export default props => {
 					Loading...
 				</h2>
 			)}
+			<h2 {...css({ textAlign: 'center', marginTop: '5rem' })}>
+				<Link to="/findings" {...css({ color: '#FFF' })}>
+					Findings
+				</Link>
+			</h2>
 		</section>
 	)
 }

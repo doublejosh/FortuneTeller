@@ -1,7 +1,10 @@
 import React from 'react'
 import { css } from 'glamor'
+import { useSelector } from 'react-redux'
 
 export default ({ f, hideVotes }) => {
+	const theme = useSelector(state => state.theme) || []
+
 	return (
 		<li
 			{...css({
@@ -11,7 +14,7 @@ export default ({ f, hideVotes }) => {
 				background: 'rgba(255, 255, 255, 0.1)',
 				position: 'relative',
 				listStyleType: 'none',
-				'@media (min-width: 600px)': {
+				[`@media(min-width: ${theme.breaks.md}px)`]: {
 					padding: '0.75rem 0 0.75rem 0.75rem',
 					marginBottom: '1rem',
 				},
@@ -24,7 +27,7 @@ export default ({ f, hideVotes }) => {
 					margin: '0',
 					fontSize: '1.5rem',
 					paddingRight: '4rem',
-					'@media (min-width: 600px)': {
+					[`@media(min-width: ${theme.breaks.md}px)`]: {
 						paddingRight: '6rem',
 					},
 				})}>

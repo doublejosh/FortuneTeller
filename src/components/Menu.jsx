@@ -2,13 +2,18 @@ import React from 'react'
 import { css } from 'glamor'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { BrainChart, Check, Ratings, Plus } from './Icons'
+import { Check, Ratings, Plus, CrystalBall } from './Icons'
 
 const links = [
+	// {
+	// 	url: '/',
+	// 	label: 'Findings',
+	// 	icon: BrainChart,
+	// },
 	{
 		url: '/',
-		label: 'Findings',
-		icon: BrainChart,
+		label: 'Explain',
+		icon: CrystalBall,
 	},
 	{
 		url: '/results',
@@ -49,7 +54,7 @@ export default () => {
 			})}>
 			<ul {...css({ listStyle: 'none', margin: 0, padding: 0, textAlign: 'center' })}>
 				{links &&
-					links.map((link, i) => (
+					links.map(link => (
 						<li
 							key={link.url}
 							{...css({

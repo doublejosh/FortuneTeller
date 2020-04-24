@@ -29,7 +29,7 @@ export default props => {
 			<section
 				{...css({
 					position: 'relative',
-					minHeight: '11rem',
+					minHeight: '10rem',
 					maxWidth: '80%',
 					margin: '1rem auto 0 auto',
 					[`@media(min-width: ${theme.breaks.md}px)`]: {

@@ -21,17 +21,20 @@ export default () => (
 		<ul
 			{...css({
 				listStyle: 'none',
-				margin: '5rem 0 10rem 0',
-				padding: 0,
+				margin: '5rem 0 0 0',
+				padding: '0 0 10rem 0',
 				textAlign: 'center',
 			})}>
 			{links &&
-				links.map((link, i) => (
+				links.map(link => (
 					<li
 						key={link.url}
 						{...css({
 							display: 'inline',
-							marginRight: '2rem',
+							marginLeft: '2rem',
+							'&:nth-child(1)': {
+								marginLeft: 0,
+							},
 						})}>
 						<a href={link.url} target="_blank" rel="noopener noreferrer">
 							<img

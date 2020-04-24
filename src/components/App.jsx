@@ -7,36 +7,41 @@ import Vote from './Survey/Vote'
 import Add from './Survey/Add'
 import Results from './Survey/Results'
 import VoteOrder from './Survey/VoteOrder'
-//import Test from './Test'
-import Menu from './Menu'
+import Explain from './Explain'
+import Common from './Common'
 import '../style.scss'
 
 export default () => (
 	<Router>
 		<Switch>
 			<Route path="/vote">
-				{/* <Logo css={{ '& h1': { opacity: '.2', width: '100%', textAlign: 'center' } }} /> */}
+				<Common />
 				<Vote />
-				<Menu />
 			</Route>
 			<Route path="/results">
+				<Common />
 				<Results />
 				<Links />
-				<Menu />
 			</Route>
 			<Route path="/add">
+				<Common />
 				<Add />
-				<Menu />
 			</Route>
 			<Route path="/order">
+				<Common />
 				<VoteOrder />
-				<Menu />
 			</Route>
-			<Route path="/">
+			<Route path="/findings">
+				<Common />
 				<Logo />
 				<Categories />
 				<Links />
-				<Menu />
+			</Route>
+			<Route path="/">
+				<Common />
+				<Logo />
+				<Explain />
+				<Links />
 			</Route>
 		</Switch>
 	</Router>

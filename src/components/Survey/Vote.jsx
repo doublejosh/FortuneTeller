@@ -26,7 +26,7 @@ export const Thanks = props => {
 	)
 }
 
-export default props => {
+export default () => {
 	const firebase = useFirebase()
 
 	const prepRankable = list =>
@@ -34,13 +34,13 @@ export default props => {
 			.filter(f => list[f])
 			.map(f => ({ ...list[f], key: f }))
 
+	// http://react-redux-firebase.com/docs/queries#types-of-queries
 	const query = {
 		type: 'once', // Avoid other user votes.
 		path: 'fortunes',
 		storeAs: 'fortunesLowVotes',
-		queryParams: ['orderByChild=rank/lastVote', 'limitToFirst=1'],
+		queryParams: ['orderByChild=rank/lastVote', 'limitToFirst=5'],
 	}
-	// http://react-redux-firebase.com/docs/queries#types-of-queries
 	useFirebaseConnect([query])
 	const fortunesLowVotes = useSelector(state => state.firebase.data.fortunesLowVotes)
 	const [selected, setSelected] = useState({})

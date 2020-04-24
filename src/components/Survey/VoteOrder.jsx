@@ -8,7 +8,7 @@ import { css } from 'glamor'
 // V1 - One at a time, pure vote recency.
 // V2 -  List of lowest voted-on (newest first), client loop.
 
-export default props => {
+export default () => {
 	useFirebaseConnect(['fortunes'])
 	let fortunes = useSelector(state => state.firebase.data.fortunes)
 

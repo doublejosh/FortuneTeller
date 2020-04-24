@@ -11,7 +11,7 @@ export default () => {
 	const fortunes = useSelector(state => state.firebase.data.fortunes)
 
 	const list = Object.keys(fortunes || {})
-		.filter(f => fortunes[f].hasOwnProperty('category'))
+		.filter(f => fortunes[f].category)
 		.map(f => ({ ...fortunes[f], key: f }))
 
 	return list ? (
@@ -20,7 +20,7 @@ export default () => {
 			<section {...css({ margin: '2rem 1rem' })}>
 				{categories &&
 					list &&
-					categories.map((category, i) => {
+					categories.map(category => {
 						return (
 							<Category
 								key={category.id}

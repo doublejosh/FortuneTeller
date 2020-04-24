@@ -1,6 +1,7 @@
 import React from 'react'
 import Fortune from './Fortune'
 import { css } from 'glamor'
+import { useSelector } from 'react-redux'
 
 import heart from '../../static/img/heart.svg'
 import diamond from '../../static/img/diamond.svg'
@@ -9,6 +10,7 @@ import eye from '../../static/img/eye.svg'
 import wave from '../../static/img/wave.svg'
 
 export default props => {
+	const theme = useSelector(state => state.theme) || []
 	const getScore = (votes, shown) => {
 		if (shown === 0 || votes > shown) return 0
 		return Math.round((parseInt(votes) / parseInt(shown)) * 100)
@@ -39,7 +41,7 @@ export default props => {
 					backgroundPosition: 'left bottom',
 					backgroundSize: 'contain',
 					padding: '.25rem 0 1rem 3rem',
-					'@media (min-width: 600px)': {
+					[`@media(min-width: ${theme.breaks.md}px)`]: {
 						fontSize: '3rem',
 						paddingLeft: '4rem',
 					},
