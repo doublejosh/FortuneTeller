@@ -17,7 +17,7 @@ export default () => {
 				'& h2, & h3': { fontWeight: 'normal' },
 			})}>
 			<h2 {...css({ fontSize: '1.75rem' })}>
-				The machine needs your human wisdom. Help decide the fate of future motals!
+				The machine needs your human wisdom. Help decide the fate of future mortals!
 			</h2>
 			<h3 {...css({ fontSize: '1.25rem', lineHeight: '1.25rem' })}>
 				One quarter and a few yes/no questions grants people with a fortune from the arcade
