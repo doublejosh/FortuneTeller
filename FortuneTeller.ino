@@ -159,11 +159,6 @@ void fetchQuestions () {
 	if (CHROME) txtToScreen("Fetching questions.", DELAY_QUICK_MSG, 1);
 	printDebug("Fetching questions.");
 	if (Firebase.getShallowData(__fbData, QUESTION_PATH)) {
-
-		txtToScreen("Fetched", DELAY_MSG, 1);
-		printDebug("Questions fetched");
-
-		printDebug(__fbData.payload());
 		FirebaseJson json;
 		size_t lineCount = json.iteratorBegin(__fbData.jsonString().c_str());
 		String _key, _val, prefix;
@@ -184,11 +179,8 @@ void fetchQuestions () {
 			delay(0);
 		}
 		json.iteratorEnd();
-		txtToScreen("Fetched", DELAY_MSG, 1);
-		printDebug("Questions fetched");
 	} else {
 		txtToScreen("Fetching failed", DELAY_MSG, 1);
-		printDebug(__fbData.payload());
 		printDebug(__fbData.errorReason());
 	}
 	__fbData.clear();
