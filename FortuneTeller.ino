@@ -108,12 +108,12 @@ bool connect (void) {
 		}
 	}
 
-  	if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED) {
 		printDebug("Wifi Error, please restart.");
-    	paint(MESSAGES[2], DELAY_MSG);
+    paint(MESSAGES[2], DELAY_MSG);
 		__offline = true;
 		return false;
-  	} else {
+  } else {
 		// Setup Firebase connection and fetch handler.
 		Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
 		Firebase.reconnectWiFi(true);
@@ -159,6 +159,11 @@ void fetchQuestions () {
 	if (CHROME) txtToScreen("Fetching questions.", DELAY_QUICK_MSG, 1);
 	printDebug("Fetching questions.");
 	if (Firebase.getShallowData(__fbData, QUESTION_PATH)) {
+
+		txtToScreen("Fetched", DELAY_MSG, 1);
+		printDebug("Questions fetched");
+
+		printDebug(__fbData.payload());
 		FirebaseJson json;
 		size_t lineCount = json.iteratorBegin(__fbData.jsonString().c_str());
 		String _key, _val, prefix;
@@ -179,8 +184,13 @@ void fetchQuestions () {
 			delay(0);
 		}
 		json.iteratorEnd();
+		txtToScreen("Fetched", DELAY_MSG, 1);
+		printDebug("Questions fetched");
+	} else {
+		txtToScreen("Fetching failed", DELAY_MSG, 1);
+		printDebug(__fbData.payload());
+		printDebug(__fbData.errorReason());
 	}
-	else printDebug(__fbData.errorReason());
 	__fbData.clear();
 }
 
@@ -271,7 +281,12 @@ void saveInteractionInit () {
 			// Add a timestamp.
 			Firebase.setTimestamp(__fbData, INTERACTIONS_PATH + "/" + __interactionId + "/" + FIELD_CREATED);
 			printDebug(F("Created interaction record."));
-		} else printDebug(F("SAVE ERROR"));
+		} else {
+			txtToScreen("Save failed", DELAY_MSG, 1);
+			printDebug(__fbData.errorReason());
+			printDebug(__fbData.stringData());
+
+		}
 	} else printDebug(F("Save skipped for testing."));
 }
 
@@ -289,7 +304,10 @@ void saveInteractionMiddle (const String category, double sensor, int version) {
 	if (SAVING) {
 		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
 			printDebug("Interaction data saved.");
-		} else printDebug("SAVE ERROR");
+		} else {
+			txtToScreen("Save failed", DELAY_MSG, 1);
+			printDebug(__fbData.errorReason());
+		}
 	} else {
 		printDebug("Save skipped for testing.");
 	}
@@ -309,7 +327,10 @@ void saveInteractionEnd (int fortune, int accurate) {
 		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
 			printDebug("Ready.");
 			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
-		} else printDebug("SAVE ERROR");
+		} else {
+			txtToScreen("Save failed", DELAY_MSG, 1);
+			printDebug(__fbData.errorReason());
+		}
 	} else {
 		printDebug("Save skipped for testing.");
 	}
@@ -364,7 +385,10 @@ void fetchFortune (const String category, uint16_t timeout) {
 		// Record full interaction data.
 		saveInteractionEnd(atoi(fortuneId.c_str()), result);
 
-	} else printDebug(__fbData.errorReason());
+	} else {
+		txtToScreen("Fetching failed", DELAY_MSG, 1);
+		printDebug(__fbData.errorReason());
+	}
 	__fbData.clear();
 }
 
