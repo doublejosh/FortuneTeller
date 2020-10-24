@@ -32,3 +32,8 @@ Arduino fortune teller, with real-world interaction metrics.
 - [LiquidCrystal](https://www.arduino.cc/en/Reference/LiquidCrystal)
 - [ESP8266WiFi](https://github.com/esp8266/Arduino/tree/master/libraries/ESP8266WiFi)
 - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+
+## Resources
+- [EspExceptionDecoder](https://github.com/me-no-dev/EspExceptionDecoder)
+- [Setup a Wemos](https://averagemaker.com/2018/04/how-to-set-up-wifi-on-a-wemos.html)
+- Beware mini USB cables with no data wires

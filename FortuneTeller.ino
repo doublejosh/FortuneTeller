@@ -20,7 +20,7 @@ LiquidCrystal __lcd(
 
 FirebaseData __fbData;
 DynamicJsonDocument __jsonDoc(JSON_DOC_BYTES);
-
+FirebaseJson __fbJson;
 typedef struct {
 	unsigned int id;
 	String text;
@@ -180,7 +180,18 @@ void fetchQuestions () {
 		}
 		json.iteratorEnd();
 	} else {
-		txtToScreen("Fetching failed", DELAY_MSG, 1);
+		txtToScreen("Fetching failed, using backup", DELAY_MSG, 1);
+		// File file = SD.open(LOCAL_DATA_PATH);
+		// DeserializationError e = deserializeJson(__jsonDoc, file);
+		// if (e.code() == DeserializationError::NoMemory) {
+		// 	printDebug("Not enough JSON memory.");
+		// }
+		// file.close();
+
+		//printDebug(__jsonDoc);
+
+		//_questionList[]
+
 		printDebug(__fbData.errorReason());
 	}
 	__fbData.clear();
@@ -264,11 +275,10 @@ JsonObject buildFortuneIndex(String jsonStr, String index[]) {
  */
 void saveInteractionInit () {
 	printDebug("SAVING...");
-	FirebaseJson fbJson;
-	fbJson.set(FIELD_MACHINE, MACHINE_ID);
+	__fbJson.set(FIELD_MACHINE, MACHINE_ID);
 	// Send interaction data.
 	if (SAVING) {
-		if (Firebase.pushJSON(__fbData, INTERACTIONS_PATH, fbJson)) {
+		if (Firebase.pushJSON(__fbData, INTERACTIONS_PATH, __fbJson)) {
 			__interactionId = __fbData.pushName();
 			// Add a timestamp.
 			Firebase.setTimestamp(__fbData, INTERACTIONS_PATH + "/" + __interactionId + "/" + FIELD_CREATED);
@@ -280,58 +290,85 @@ void saveInteractionInit () {
 
 		}
 	} else printDebug(F("Save skipped for testing."));
+	__fbJson.clear();
 }
 
 /**
  * Save mid-point interaction data to Firebase, for crash awareness.
  */
-void saveInteractionMiddle (const String category, double sensor, int version) {
-	printDebug("SAVING...");
-	FirebaseJson fbJson;
-	fbJson.set(FIELD_CATEGORY, category);
-	fbJson.set(FIELD_SENSOR, sensor);
-	fbJson.set(FIELD_VERSION, version);
-	fbJson.set(FIELD_RANDOM, __randomChoice);
-	// Send interaction data.
-	if (SAVING) {
-		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
-			printDebug("Interaction data saved.");
-		} else {
-			txtToScreen("Save failed", DELAY_MSG, 1);
-			printDebug(__fbData.errorReason());
-		}
-	} else {
-		printDebug("Save skipped for testing.");
-	}
-}
+// void saveInteractionMiddle (const String category, double sensor, int version) {
+// 	__fbJson.clear();
+// 	__fbJson.set(FIELD_CATEGORY, category);
+// 	__fbJson.set(FIELD_SENSOR, sensor);
+// 	__fbJson.set(FIELD_VERSION, version);
+// 	__fbJson.set(FIELD_RANDOM, __randomChoice);
+// 	if (DEBUG) {
+// 		String buffer;
+// 		__fbJson.toString(buffer, true);
+// 		printDebug(buffer);
+// 		delay(0);
+// 	}
+
+// 	// Send interaction data.
+// 	if (SAVING) {
+// 		printDebug("SAVING...");
+// 		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, __fbJson)) {
+// 			printDebug("Interaction data saved.");
+// 		} else {
+// 			txtToScreen("Save failed", DELAY_MSG, 1);
+// 			printDebug(__fbData.errorReason());
+// 			printDebug(__fbData.stringData());
+// 		}
+// 	} else {
+// 		printDebug("Save skipped for testing.");
+// 	}
+// 	__fbJson.clear();
+// }
 
 /**
  * Save final interaction data to Firebase.
+ *
+ * @todo Test if int fortuneIDs is the problem.
  */
-void saveInteractionEnd (int fortune, int accurate) {
-	printDebug("SAVING...");
-	FirebaseJson fbJson;
-	fbJson.set(FIELD_FORTUNE_ID, fortune);
-	fbJson.set(FIELD_ACCURATE, accurate);
+// void saveInteractionEnd (String fortuneId, const String category, int accurate, unsigned int version) {
+void saveInteractionEnd (String fortuneId, int accurate, const String category, int version) {
+	__fbJson.set(FIELD_FORTUNE_ID, fortuneId);
+	__fbJson.set(FIELD_ACCURATE, accurate);
+	__fbJson.set(FIELD_CATEGORY, category);
+	__fbJson.set(FIELD_VERSION, version);
+	__fbJson.set(FIELD_RANDOM, __randomChoice);
+	// @todo Get sensor reading.
+	// double sensor = 123.456;
+	//__fbJson.set(FIELD_SENSOR, sensor);
+	if (DEBUG) {
+		String buffer;
+		__fbJson.toString(buffer, true);
+		printDebug(buffer);
+		delay(0);
+	}
+
 	// Send interaction data.
 	if (CHROME) paint(MESSAGES[SAVE], DELAY_MSG);
 	if (SAVING) {
-		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, fbJson)) {
+		printDebug("SAVING...");
+		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, __fbJson)) {
 			printDebug("Ready.");
 			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
 		} else {
 			txtToScreen("Save failed", DELAY_MSG, 1);
 			printDebug(__fbData.errorReason());
+			printDebug(__fbData.stringData());
 		}
 	} else {
 		printDebug("Save skipped for testing.");
 	}
+	__fbJson.clear();
 }
 
 /**
  * Get fortune online based on chosen category.
  */
-void fetchFortune (const String category, uint16_t timeout) {
+void fetchFortune (const String category, uint16_t timeout, int version) {
 	if (CHROME) play(APPEAR_FRAMES, 6);
 	paint(MESSAGES[FETCHING], DELAY_MSG);
 	printDebug("Fortune category: " + category);
@@ -375,8 +412,7 @@ void fetchFortune (const String category, uint16_t timeout) {
 			paint(MESSAGES[TIMEOUT], DELAY_MSG);
 		}
 		// Record full interaction data.
-		saveInteractionEnd(atoi(fortuneId.c_str()), result);
-
+		saveInteractionEnd(fortuneId, result, category, version);
 	} else {
 		txtToScreen("Fetching failed", DELAY_MSG, 1);
 		printDebug(__fbData.errorReason());
@@ -406,10 +442,8 @@ void askQuestion (String id, unsigned int version) {
 	}
 	// End of the question tree.
 	if (!questionFound) {
-		// @todo Get sensor reading.
-		double sensor = 123.456;
-		saveInteractionMiddle(id, sensor, version);
-		fetchFortune(id, QUESTION_TIMEOUT);
+		// saveInteractionMiddle(id, sensor, version);
+		fetchFortune(id, QUESTION_TIMEOUT, version);
 		// @todo Handle no fortune.
 		return;
 	}
@@ -489,10 +523,10 @@ void runTests () {
 	printDebug(F("Running fortune tests..."));
 	for (uint8_t t = 0; t < sizeof(tests)/sizeof(tests[0]); t++) {
 		saveInteractionInit();
+		// delay(FAST_TIMEOUT);
+		// saveInteractionMiddle("heart", 123.456, 0);
 		delay(FAST_TIMEOUT);
-		saveInteractionMiddle("heart", 123.456, 0);
-		delay(FAST_TIMEOUT);
-		fetchFortune(tests[t], FAST_TIMEOUT);
+		fetchFortune(tests[t], FAST_TIMEOUT, 0);
 		printDebug(F(" "));
 		printDebug(F("- - - - - - - - - - - - - - - - - - - - - - -"));
 	}
