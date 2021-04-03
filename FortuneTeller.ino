@@ -109,12 +109,12 @@ bool connect (void) {
 		}
 	}
 
-  	if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED) {
 		printDebug("Wifi Error, please restart.");
     paint(MESSAGES[2], DELAY_MSG);
 		__offline = true;
 		return false;
-  	} else {
+  } else {
 		// Setup Firebase connection and fetch handler.
 		Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
 		Firebase.reconnectWiFi(true);
