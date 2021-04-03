@@ -64,11 +64,16 @@ void play (char frames[][HEIGHT][WIDTH+1], uint8_t count) {
 /**
  * Show text message on the screen.
  */
-void txtToScreen (String msg, int wait, int row) {
-	__lcd.clear();
-	__lcd.setCursor(0, row);
-	__lcd.print(msg);
-	delay(wait);
+void txtToScreen (String msg, int wait, int row, bool ignoreChromeCheck = false) {
+	printDebug(msg);
+	if (CHROME || ignoreChromeCheck) {
+		__lcd.clear();
+		__lcd.setCursor(WIDTH-1, HEIGHT);
+		__lcd.print("~");
+		__lcd.setCursor(0, row);
+		__lcd.print(msg);
+		delay(wait);
+	}
 }
 
 /**
@@ -79,8 +84,7 @@ bool connect (void) {
 	uint8_t wifiTry = 0;
 
 	for (uint8_t i = 0; i < sizeof(WIFI_SSID)/sizeof(WIFI_SSID[0]); i++) {
-		printDebug("Connecting: " + WIFI_SSID[i]);
-		if (CHROME) txtToScreen("Connecting: " + WIFI_SSID[i].substring(0, 8), DELAY_MSG, 1);
+		txtToScreen("Connecting: " + WIFI_SSID[i].substring(0, 8), DELAY_MSG, 1);
 
 		WiFi.begin(WIFI_SSID[i], WIFI_PASSWORD[i]);
 		while (WiFi.status() != WL_CONNECTED) {
@@ -97,20 +101,17 @@ bool connect (void) {
 		}
 		if (WiFi.status() == WL_CONNECTED) {
 			msg = "Done: " + WiFi.localIP().toString();
-			if (CHROME) txtToScreen(msg, DELAY_QUICK_MSG, 1);
-			printDebug(msg);
+			txtToScreen(msg, DELAY_QUICK_MSG, 1);
 			break;
 		}
 		else {
-			msg = "Unable to connect.";
-			printDebug(msg);
-			txtToScreen(msg, DELAY_MSG, 1);
+			txtToScreen("Unable to connect.", DELAY_MSG, 1);
 		}
 	}
 
   	if (WiFi.status() != WL_CONNECTED) {
 		printDebug("Wifi Error, please restart.");
-    	paint(MESSAGES[2], DELAY_MSG);
+    paint(MESSAGES[2], DELAY_MSG);
 		__offline = true;
 		return false;
   	} else {
@@ -156,8 +157,7 @@ unsigned int getInt (String key) {
  * Get list of questions online and stash for later.
  */
 void fetchQuestions () {
-	if (CHROME) txtToScreen("Fetching questions.", DELAY_QUICK_MSG, 1);
-	printDebug("Fetching questions.");
+	txtToScreen("Fetching questions.", DELAY_QUICK_MSG, 1);
 	if (Firebase.getShallowData(__fbData, QUESTION_PATH)) {
 		FirebaseJson json;
 		size_t lineCount = json.iteratorBegin(__fbData.jsonString().c_str());
@@ -380,9 +380,8 @@ void askQuestion (String id, unsigned int version) {
 	for (uint8_t i = 0; i < sizeof(_questionList) / sizeof(_questionList[0]); i++) {
 		question = _questionList[i];
 		if (question.name == id) {
-			printDebug(question.text);
 			if (CHROME) play(APPEAR_FRAMES, 6);
-			txtToScreen(question.text, DELAY_NONE, 0);
+			txtToScreen(question.text, DELAY_NONE, 0, true);
 			questionFound = true;
 			break;
 		}
@@ -464,6 +463,43 @@ void sleep () {
 	delay(10);
 }
 
+void saveFirebaseData () {
+  if (!Firebase.backup(__fbData, StorageType::SD, "/data", "/{BACKUP_FILE}") {
+    printDebug("Backup failed: " + __fbData.fileTransferError());
+  } else {
+    printDebug("Backup success!");
+    printDebug("SIZE: " + String(__fbData.getBackupFileSize()));
+  }
+}
+
+void restoreFirebaseData () {
+  if (!Firebase.restore(__fbData, StorageType::SD, "/data", "/{BACKUP_FILE}") {
+		printDebug("Restore backup failed: " + __fbData.fileTransferError());
+  } else {
+		printDebug("Restore backup success!");
+		printDebug("SIZE: " + String(__fbData.getBackupFileSize()));
+  }
+}
+
+void attemptDataRefresh() {
+	while (sizeof(_questionList) > 0) {
+		txtToScreen("Fetching questions.", DELAY_QUICK_MSG, 1);
+		fetchQuestions();
+		// if data was reteieved, save it
+		// else, keep current backup data
+	}
+
+	// fetch all fortunes
+	printDebug("Fetching fortune network.");
+	printDebug("Ready.");
+
+	if (Firebase.getJSON(__fbData, FORTUNES_PATH, query)) {
+		saveFirebaseData();
+	} else {
+		printDebug("Using backup");
+	}
+}
+
 /**
  * Quickly try a series of critical actions.
  */
@@ -520,9 +556,13 @@ void setup (void) {
 	// Fetch and stash question data.
 	if (connect()) {
 		runTests();
-		fetchQuestions();
-		printDebug("Ready.");
+		restoreFbData();
+		attemptDataRefresh();
 		paint(SLEEP_FRAMES[0], DELAY_NONE);
+	} else {
+		__offline = true;
+		txtToScreen("No internet connection.", DELAY_QUICK_MSG, 1);
+		printDebug("No internet connection.");
 	}
 }
 
