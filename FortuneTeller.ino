@@ -44,6 +44,7 @@ Question _questionList[QUESTION_LIST_LENGTH];
 void paint (char screen[HEIGHT][WIDTH+1], int wait) {
 	__lcd.noDisplay();
 	__lcd.clear();
+	offlineMarker();
 	for (uint8_t i = 0; i < sizeof(screen); i++) {
 		__lcd.setCursor(0, i);
 		__lcd.print(String(screen[i]));
@@ -61,6 +62,13 @@ void play (char frames[][HEIGHT][WIDTH+1], uint8_t count) {
 	}
 }
 
+void offlineMarker () {
+	if (__offline) {
+		__lcd.setCursor(WIDTH-1, HEIGHT);
+		__lcd.print("~");
+	}
+}
+
 /**
  * Show text message on the screen.
  */
@@ -68,8 +76,7 @@ void txtToScreen (String msg, int wait, int row, bool ignoreChromeCheck = false)
 	printDebug(msg);
 	if (CHROME || ignoreChromeCheck) {
 		__lcd.clear();
-		__lcd.setCursor(WIDTH-1, HEIGHT);
-		__lcd.print("~");
+		offlineMarker();
 		__lcd.setCursor(0, row);
 		__lcd.print(msg);
 		delay(wait);
@@ -556,13 +563,12 @@ void setup (void) {
 	// Fetch and stash question data.
 	if (connect()) {
 		runTests();
-		restoreFbData();
 		attemptDataRefresh();
 		paint(SLEEP_FRAMES[0], DELAY_NONE);
 	} else {
 		__offline = true;
+		restoreFirebaseData();
 		txtToScreen("No internet connection.", DELAY_QUICK_MSG, 1);
-		printDebug("No internet connection.");
 	}
 }
 
