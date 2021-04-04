@@ -10,7 +10,8 @@
 
 uint8_t __trigger, __sleepFrame = 0;
 uint32_t __timer = 1;
-bool __offline = false, __randomChoice = false;
+bool __offline = false, __randomChoice = false,
+	__chrome = CHROME, __freeplay = FREEPLAY;
 String __interactionId = "";
 
 LiquidCrystal __lcd(
@@ -80,7 +81,7 @@ bool connect (void) {
 
 	for (uint8_t i = 0; i < sizeof(WIFI_SSID)/sizeof(WIFI_SSID[0]); i++) {
 		printDebug("Connecting: " + WIFI_SSID[i]);
-		if (CHROME) txtToScreen("Connecting: " + WIFI_SSID[i].substring(0, 8), DELAY_MSG, 1);
+		if (__chrome) txtToScreen("Connecting: " + WIFI_SSID[i].substring(0, 8), DELAY_MSG, 1);
 
 		WiFi.begin(WIFI_SSID[i], WIFI_PASSWORD[i]);
 		while (WiFi.status() != WL_CONNECTED) {
@@ -97,7 +98,7 @@ bool connect (void) {
 		}
 		if (WiFi.status() == WL_CONNECTED) {
 			msg = "Done: " + WiFi.localIP().toString();
-			if (CHROME) txtToScreen(msg, DELAY_QUICK_MSG, 1);
+			if (__chrome) txtToScreen(msg, DELAY_QUICK_MSG, 1);
 			printDebug(msg);
 			break;
 		}
@@ -156,7 +157,7 @@ unsigned int getInt (String key) {
  * Get list of questions online and stash for later.
  */
 void fetchQuestions () {
-	if (CHROME) txtToScreen("Fetching questions.", DELAY_QUICK_MSG, 1);
+	if (__chrome) txtToScreen("Fetching questions.", DELAY_QUICK_MSG, 1);
 	printDebug("Fetching questions.");
 	if (Firebase.getShallowData(__fbData, QUESTION_PATH)) {
 		FirebaseJson json;
@@ -348,12 +349,12 @@ void saveInteractionEnd (String fortuneId, int accurate, const String category, 
 	}
 
 	// Send interaction data.
-	if (CHROME) paint(MESSAGES[SAVE], DELAY_MSG);
+	if (__chrome) paint(MESSAGES[SAVE], DELAY_MSG);
 	if (SAVING) {
 		printDebug("SAVING...");
 		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, __fbJson)) {
 			printDebug("Ready.");
-			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
+			if (__chrome) paint(MESSAGES[FUTURE], DELAY_MSG);
 		} else {
 			txtToScreen("Save failed", DELAY_MSG, 1);
 			printDebug(__fbData.errorReason());
@@ -369,7 +370,7 @@ void saveInteractionEnd (String fortuneId, int accurate, const String category, 
  * Get fortune online based on chosen category.
  */
 void fetchFortune (const String category, uint16_t timeout, int version) {
-	if (CHROME) play(APPEAR_FRAMES, 6);
+	if (__chrome) play(APPEAR_FRAMES, 6);
 	paint(MESSAGES[FETCHING], DELAY_MSG);
 	printDebug("Fortune category: " + category);
 
@@ -433,7 +434,7 @@ void askQuestion (String id, unsigned int version) {
 		question = _questionList[i];
 		if (question.name == id) {
 			printDebug(question.text);
-			if (CHROME) play(APPEAR_FRAMES, 6);
+			if (__chrome) play(APPEAR_FRAMES, 6);
 			txtToScreen(question.text, DELAY_NONE, 0);
 			questionFound = true;
 			break;
@@ -450,7 +451,7 @@ void askQuestion (String id, unsigned int version) {
 	int result = ask(QUESTION_TIMEOUT);
 
 	// Go to the next step.
-	String next;
+	std::string next;
 	if (result == ANSWER_YES) {
 		paint(MESSAGES[PICK_YES], DELAY_QUICK_MSG);
 		next = question.nextYes;
@@ -472,7 +473,7 @@ void askQuestion (String id, unsigned int version) {
 void coin () {
 	// Greeting routine.
 	printDebug("Coin! **********");
-	if (CHROME) {
+	if (__chrome) {
 		play(WAKE_FRAMES, 19);
 		paint(MESSAGES[GREET1], DELAY_MSG);
 		play(APPEAR_FRAMES, 6);
@@ -484,7 +485,7 @@ void coin () {
 	// Start question tree.
 	__interactionId = "";
 	__randomChoice = false;
-	String next = FIRST_QUESTION_ID;
+	std::string next = FIRST_QUESTION_ID;
 	saveInteractionInit();
 	askQuestion(next, 0);
 }
@@ -546,21 +547,21 @@ void setup (void) {
 
 	// On-the-fly alternate modes.
 	if (digitalRead(BTN1_PULLUP) == LOW) {
-		CHROME = false;
+		__chrome = false;
 	}
 	if (digitalRead(BTN2_PULLUP) == LOW) {
-		FREEPLAY = true;
+		__freeplay = true;
 	}
 
 	// Improve UX on reboot.
-	if (CHROME) {
+	if (__chrome) {
 		// Delay required for random seed.
 		delay(1000);
 		rebootFortune();
 	}
 
 	// Welcome messages.
-	if (CHROME) paint(MESSAGES[BOOT], DELAY_QUICK_MSG);
+	if (__chrome) paint(MESSAGES[BOOT], DELAY_QUICK_MSG);
 	else {
 		__lcd.clear();
 		__lcd.setCursor(0, 1);
