@@ -1,22 +1,23 @@
-#include <LiquidCrystal.h>
-#include "FirebaseESP8266.h"
+#include <SPI.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 #include <ESP8266WiFi.h>
 #include <ArduinoJson.h>
 #include <math.h>
-#include <string>
+#include <FirebaseESP8266.h>
 #include "utilities.h"
 #include "animation.h"
 #include "messages.h"
+#include "ESPSafeMaster.h"
 
 uint8_t __trigger, __sleepFrame = 0;
 uint32_t __timer = 1;
 bool __offline = false, __randomChoice = false;
 String __interactionId = "";
 
-LiquidCrystal __lcd(
-	displayRS, displayEN, displayD4,
-	displayD5, displayD6, displayD7
-);
+LiquidCrystal_I2C __lcd(0x27, 20, 4);
+
+ESPSafeMaster esp(SS);
 
 FirebaseData __fbData;
 DynamicJsonDocument __jsonDoc(JSON_DOC_BYTES);
@@ -69,6 +70,18 @@ void txtToScreen (String msg, int wait, int row) {
 	__lcd.setCursor(0, row);
 	__lcd.print(msg);
 	delay(wait);
+}
+
+/**
+ * Pass data to audio player board (ruxpin).
+ */
+void send (const char * message) {
+	printDebug("Commander: ");
+	printDebug(message);
+	esp.writeData(message);
+	delay(10);
+	printDebug("Audio Player: ");
+	printDebug(esp.readData());
 }
 
 /**
@@ -354,6 +367,7 @@ void saveInteractionEnd (String fortuneId, int accurate, const String category, 
 		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, __fbJson)) {
 			printDebug("Ready.");
 			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
+			send("/audio-phrases-1.mp3");
 		} else {
 			txtToScreen("Save failed", DELAY_MSG, 1);
 			printDebug(__fbData.errorReason());
@@ -474,6 +488,7 @@ void coin () {
 	printDebug("Coin! **********");
 	if (CHROME) {
 		play(WAKE_FRAMES, 19);
+		send("/audio-phrases-0.mp3");
 		paint(MESSAGES[GREET1], DELAY_MSG);
 		play(APPEAR_FRAMES, 6);
 		paint(MESSAGES[GREET2], DELAY_QUICK_MSG);
@@ -537,7 +552,14 @@ void runTests () {
 
 void setup (void) {
 	if (DEBUG) Serial.begin(SERIAL_RATE);
+	Wire.begin();
+	__lcd.init();
 	__lcd.begin(WIDTH, HEIGHT);
+	__lcd.backlight();
+
+	SPI.begin();
+  	esp.begin();
+
 	pinMode(TRIGGER_PIN, INPUT);
 	pinMode(BTN1_PULLUP, INPUT_PULLUP);
 	pinMode(BTN2_PULLUP, INPUT_PULLUP);

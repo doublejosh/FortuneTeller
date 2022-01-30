@@ -16,7 +16,7 @@ void printDebug(String msg)
 /**
  * Wrap text to display, clearly pasted from StackOverflow :)
  */
-void wrapTxtToScreen(LiquidCrystal &lcd, String msg)
+void wrapTxtToScreen(LiquidCrystal_I2C &lcd, String msg)
 {
     byte offset = 0, charNum = 0, dataLength = strlen(msg.c_str());
 
@@ -54,7 +54,7 @@ void wrapTxtToScreen(LiquidCrystal &lcd, String msg)
 /**
  * Wrap text to display, clearly pasted from StackOverflow :)
  */
-char *wordWrap(LiquidCrystal &lcd, char *string, int line_width)
+char *wordWrap(LiquidCrystal_I2C &lcd, char *string, int line_width)
 {
     int i = 0, k, counter, row = 0;
     char *buffer;
