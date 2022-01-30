@@ -16,7 +16,6 @@ bool __offline = false, __randomChoice = false;
 String __interactionId = "";
 
 LiquidCrystal_I2C __lcd(0x27, 20, 4);
-
 ESPSafeMaster esp(SS);
 
 FirebaseData __fbData;
@@ -75,7 +74,7 @@ void txtToScreen (String msg, int wait, int row) {
 /**
  * Pass data to audio player board (ruxpin).
  */
-void send (const char * message) {
+void sendSpi (const char * message) {
 	printDebug("Commander: ");
 	printDebug(message);
 	esp.writeData(message);
@@ -367,7 +366,7 @@ void saveInteractionEnd (String fortuneId, int accurate, const String category, 
 		if (Firebase.updateNode(__fbData, INTERACTIONS_PATH + "/" + __interactionId, __fbJson)) {
 			printDebug("Ready.");
 			if (CHROME) paint(MESSAGES[FUTURE], DELAY_MSG);
-			send("/audio-phrases-1.mp3");
+			sendSpi("/audio-phrases-1.mp3");
 		} else {
 			txtToScreen("Save failed", DELAY_MSG, 1);
 			printDebug(__fbData.errorReason());
@@ -410,6 +409,7 @@ void fetchFortune (const String category, uint16_t timeout, int version) {
 		const char* fortune = listObj[fortuneId][FIELD_TEXT];
 		printDebug(fortune);
 		wrapTxtToScreen(__lcd, fortune);
+		// sendSpi()
 		delay(DELAY_FORTUNE);
 		// Analytics for views of each fortune.
 		increaseMetric(fortuneId, FIELD_SHOWN);
@@ -443,11 +443,17 @@ void askQuestion (String id, unsigned int version) {
 	// Grab data from cached global and show.
 	Question question;
 	bool questionFound = false;
+	char* filename = "";
+	strcpy(filename, "/audio-questions-");
+	strcat(filename, id.c_str());
+	strcat(filename, ".mp3");
+
 	for (uint8_t i = 0; i < sizeof(_questionList) / sizeof(_questionList[0]); i++) {
 		question = _questionList[i];
 		if (question.name == id) {
 			printDebug(question.text);
 			if (CHROME) play(APPEAR_FRAMES, 6);
+			sendSpi(filename);
 			txtToScreen(question.text, DELAY_NONE, 0);
 			questionFound = true;
 			break;
@@ -472,6 +478,7 @@ void askQuestion (String id, unsigned int version) {
 		paint(MESSAGES[PICK_NO], DELAY_QUICK_MSG);
 		next = question.nextNo;
 	} else {
+		sendSpi("/audio-phrases-2.mp3");
 		paint(MESSAGES[RANDOM], DELAY_MSG);
 		// Mark interactions with random selection.
 		__randomChoice = true;
@@ -487,8 +494,8 @@ void coin () {
 	// Greeting routine.
 	printDebug("Coin! **********");
 	if (CHROME) {
+		sendSpi("/audio-phrases-0.mp3");
 		play(WAKE_FRAMES, 19);
-		send("/audio-phrases-0.mp3");
 		paint(MESSAGES[GREET1], DELAY_MSG);
 		play(APPEAR_FRAMES, 6);
 		paint(MESSAGES[GREET2], DELAY_QUICK_MSG);

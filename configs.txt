@@ -28,10 +28,10 @@ const int displayRS = D5,
 
 // DATA STRUCTURE...
 
-std::string FORTUNES_PATH     = "/fortunes";
-std::string INTERACTIONS_PATH = "/interactions";
-std::string QUESTION_PATH     = "/questions";
-std::string FIRST_QUESTION_ID = "first";
+String FORTUNES_PATH     = "/fortunes";
+String INTERACTIONS_PATH = "/interactions";
+String QUESTION_PATH     = "/questions";
+String FIRST_QUESTION_ID = "first";
 
 char* FIELD_TEXT       = "text";
 char* FIELD_CATEGORY   = "category";
