@@ -19,6 +19,7 @@ Arduino fortune teller, with real-world interaction metrics.
 1. Create sample data, see structure in configs.
 
 ### [Simple Starter](https://github.com/doublejosh/FortuneExample)
+### [Audio Player](https://github.com/doublejosh/ruxpin)
 
 ## Hardware
 - Wemos D1 Mini (Arduino)
