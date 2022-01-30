@@ -383,6 +383,7 @@ void saveInteractionEnd (String fortuneId, int accurate, const String category, 
  */
 void fetchFortune (const String category, uint16_t timeout, int version) {
 	if (CHROME) play(APPEAR_FRAMES, 6);
+	sendSpi("/audio-phrases-6.mp3");
 	paint(MESSAGES[FETCHING], DELAY_MSG);
 	printDebug("Fortune category: " + category);
 
@@ -409,20 +410,31 @@ void fetchFortune (const String category, uint16_t timeout, int version) {
 		const char* fortune = listObj[fortuneId][FIELD_TEXT];
 		printDebug(fortune);
 		wrapTxtToScreen(__lcd, fortune);
-		// sendSpi()
+		
+		// speak the fortune
+		char* filename = "";
+		strcpy(filename, "/audio-fortunes-");
+		strcat(filename, fortuneId.c_str());
+		strcat(filename, ".mp3");
+		sendSpi(filename);
+
 		delay(DELAY_FORTUNE);
 		// Analytics for views of each fortune.
 		increaseMetric(fortuneId, FIELD_SHOWN);
 
 		// Ask for accuracy.
+		sendSpi("/audio-phrases-3.mp3");
 		paint(MESSAGES[ACCURATE], DELAY_NONE);
 		int result = ask(timeout);
 		if (result == ANSWER_YES) {
+			sendSpi("/audio-phrases-4.mp3");
 			paint(MESSAGES[CORRECT], DELAY_MSG);
 			increaseMetric(fortuneId, FIELD_VOTES);
 		} else if (result == ANSWER_NO) {
+			sendSpi("/audio-phrases-5.mp3");
 			paint(MESSAGES[WRONG], DELAY_MSG);
 		} else {
+			sendSpi("/audio-phrases-10.mp3");
 			paint(MESSAGES[TIMEOUT], DELAY_MSG);
 		}
 		// Record full interaction data.
@@ -472,9 +484,11 @@ void askQuestion (String id, unsigned int version) {
 	// Go to the next step.
 	String next;
 	if (result == ANSWER_YES) {
+		sendSpi("/audio-phrases-8.mp3");
 		paint(MESSAGES[PICK_YES], DELAY_QUICK_MSG);
 		next = question.nextYes;
 	} else if (result == ANSWER_NO) {
+		sendSpi("/audio-phrases-9.mp3");
 		paint(MESSAGES[PICK_NO], DELAY_QUICK_MSG);
 		next = question.nextNo;
 	} else {
@@ -612,6 +626,7 @@ void loop (void) {
 	if (__trigger == HIGH) {
 		coin();
 	} else if (FREEPLAY && digitalRead(BTN2_PULLUP) == LOW) {
+		sendSpi("/audio-phrases-7.mp3");
 		paint(MESSAGES[FREEBIE], DELAY_MSG);
 		coin();
 	} else sleep();
