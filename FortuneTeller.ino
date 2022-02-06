@@ -1,26 +1,29 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-#include <ESP8266WiFi.h>
-#include <ArduinoJson.h>
+// #include <ArduinoJson.h>
 #include <math.h>
 #include <FirebaseESP8266.h>
+#include <ESP8266WiFi.h> // must come after FirebaseESP8266
 #include "utilities.h"
 #include "animation.h"
 #include "messages.h"
 #include "ESPSafeMaster.h"
 
+// https://github.com/mobizt/Firebase-ESP8266/issues/5
+
 uint8_t __trigger, __sleepFrame = 0;
 uint32_t __timer = 1;
-bool __offline = false, __randomChoice = false;
+bool __offline = false, __randomChoice = false, hasWoke = false;
 String __interactionId = "";
 
 LiquidCrystal_I2C __lcd(0x27, 20, 4);
 ESPSafeMaster esp(SS);
 
 FirebaseData __fbData;
-DynamicJsonDocument __jsonDoc(JSON_DOC_BYTES);
+// DynamicJsonDocument __jsonDoc(JSON_DOC_BYTES);
 FirebaseJson __fbJson;
+QueryFilter __query;
 typedef struct {
 	unsigned int id;
 	String text;
@@ -79,8 +82,9 @@ void sendSpi (const char * message) {
 	printDebug(message);
 	esp.writeData(message);
 	delay(10);
-	printDebug("Audio Player: ");
-	printDebug(esp.readData());
+	//printDebug("Audio Player: ");
+	//printDebug(esp.readData());
+	delay(AUDIO_PLAY_DELAY);
 }
 
 /**
@@ -90,6 +94,10 @@ bool connect (void) {
 	String msg;
 	uint8_t wifiTry = 0;
 
+	if (WiFi.status() == WL_CONNECTED) {
+		return true;
+	}
+
 	for (uint8_t i = 0; i < sizeof(WIFI_SSID)/sizeof(WIFI_SSID[0]); i++) {
 		printDebug("Connecting: " + WIFI_SSID[i]);
 		if (CHROME) txtToScreen("Connecting: " + WIFI_SSID[i].substring(0, 8), DELAY_MSG, 1);
@@ -97,16 +105,18 @@ bool connect (void) {
 		WiFi.begin(WIFI_SSID[i], WIFI_PASSWORD[i]);
 		while (WiFi.status() != WL_CONNECTED) {
 			delay(WIFI_RETRY_DELAY);
-			if (wifiTry == 4) {
+			if (wifiTry == WIFI_RETRIES) {
+				printDebug("Giving up on this wifi.");
 				WiFi.disconnect();
 				wifiTry = 0;
 				break;
 			}
 			else {
+				printDebug("Status: " + String(WiFi.isConnected()));
 				wifiTry++;
-				printDebug(".");
 			}
 		}
+
 		if (WiFi.status() == WL_CONNECTED) {
 			msg = "Done: " + WiFi.localIP().toString();
 			if (CHROME) txtToScreen(msg, DELAY_QUICK_MSG, 1);
@@ -122,7 +132,7 @@ bool connect (void) {
 
   if (WiFi.status() != WL_CONNECTED) {
 		printDebug("Wifi Error, please restart.");
-    paint(MESSAGES[2], DELAY_MSG);
+    	paint(MESSAGES[2], DELAY_MSG);
 		__offline = true;
 		return false;
   } else {
@@ -192,7 +202,7 @@ void fetchQuestions () {
 		}
 		json.iteratorEnd();
 	} else {
-		txtToScreen("Fetching failed, using backup", DELAY_MSG, 1);
+		txtToScreen("Fetching failed", DELAY_MSG, 1);
 		// File file = SD.open(LOCAL_DATA_PATH);
 		// DeserializationError e = deserializeJson(__jsonDoc, file);
 		// if (e.code() == DeserializationError::NoMemory) {
@@ -261,31 +271,37 @@ int8_t ask (uint16_t timeout) {
 /**
  * Organize fortunes into indexed list, to pick randomly.
  */
-JsonObject buildFortuneIndex(String jsonStr, String index[]) {
-	printDebug("fortunes indexed.");
-	// Parse JSON from string.
-	DeserializationError e = deserializeJson(__jsonDoc, jsonStr);
-	if (e.code() == DeserializationError::NoMemory) {
-		printDebug("Not enough JSON memory.");
-	}
-	// Create index of ids.
-	JsonObject listObj = __jsonDoc.as<JsonObject>();
-	uint8_t id = 0;
-	for (JsonObject::iterator i=listObj.begin(); i!=listObj.end(); ++i) {
-		index[id] = String(i->key().c_str());
-		printDebug(String(id) + ": " + String(i->key().c_str()));
-		id++;
-		// Keep the ESP watchdog happy (avoid soft reset).
-		delay(0);
-	}
+// JsonObject buildFortuneIndex(String jsonStr, String index[]) {
+// 	printDebug("fortunes indexed.");
+// 	// Parse JSON from string.
+// 	DeserializationError e = deserializeJson(__jsonDoc, jsonStr);
+// 	if (e.code() == DeserializationError::NoMemory) {
+// 		printDebug("Not enough JSON memory.");
+// 	}
+// 	// Create index of ids.
+// 	JsonObject listObj = __jsonDoc.as<JsonObject>();
+// 	uint8_t id = 0;
+// 	for (JsonObject::iterator i=listObj.begin(); i!=listObj.end(); ++i) {
+// 		index[id] = String(i->key().c_str());
+// 		printDebug(String(id) + ": " + String(i->key().c_str()));
+// 		id++;
+// 		// Keep the ESP watchdog happy (avoid soft reset).
+// 		delay(0);
+// 	}
 
-	return listObj;
-}
+// 	return listObj;
+// }
 
 /**
  * Create inital interaction event to Firebase, for crash awareness.
  */
 void saveInteractionInit () {
+	printDebug("saveInteractionInit - wifi connected: " + String(WiFi.isConnected()));
+	// ensure connection
+	connect();
+	printDebug("saveInteractionInit - wifi connected: " + String(WiFi.isConnected()));
+
+
 	printDebug("SAVING...");
 	__fbJson.set(FIELD_MACHINE, MACHINE_ID);
 	// Send interaction data.
@@ -376,44 +392,120 @@ void saveInteractionEnd (String fortuneId, int accurate, const String category, 
 		printDebug("Save skipped for testing.");
 	}
 	__fbJson.clear();
+
+	// WiFi.disconnect();
+	// WiFi.mode(WIFI_OFF);
+	// WiFi.forceSleepBegin();
 }
+
+/**
+ * 
+ */
+void fetchFortune (const String category, uint16_t timeout, int version) {
+
 
 /**
  * Get fortune online based on chosen category.
  */
-void fetchFortune (const String category, uint16_t timeout, int version) {
+void fetchFortuneOLD (const String category, uint16_t timeout, int version) {
 	if (CHROME) play(APPEAR_FRAMES, 6);
-	sendSpi("/audio-phrases-6.mp3");
 	paint(MESSAGES[FETCHING], DELAY_MSG);
 	printDebug("Fortune category: " + category);
-
 	// Fetch relevant fortunes.
-	QueryFilter query;
-	query.orderBy(FIELD_CATEGORY);
-	query.equalTo(category);
-	query.limitToFirst(FORTUNE_GET_MAX);
-	String index[FORTUNE_INDEX_MAX];
+	__query.orderBy(FIELD_CATEGORY).equalTo(String(category)).limitToFirst(FORTUNE_GET_MAX);
+	uint8_t randomIndex = random(0, FORTUNE_GET_MAX - 1);
+	String fortuneId = "";
+	String fortuneText = "";
+	char* filename = "";
+
+	printDebug("randomIndex");
+	printDebug(String(randomIndex));
+
+	printDebug("fetchFortune - wifi connected: " + String(WiFi.isConnected()));
+
 	// @todo Catch or handle fortune network fails.
 	// https://github.com/doublejosh/FortuneTeller/issues/3
-	if (Firebase.getJSON(__fbData, FORTUNES_PATH, query)) {
+	Firebase.getJSON(__fbData, FORTUNES_PATH, __query);
+	__fbJson = __fbData.jsonObject();
 
-		// Parse fortune list results.
-		printDebug("Fortunes fetched.");
-		FirebaseJson &json = __fbData.jsonObject();
-		String jsonStr;
-		json.toString(jsonStr, false); // Param two is prettify.
-		printDebug(jsonStr);
-		JsonObject listObj = buildFortuneIndex(jsonStr, index);
+	size_t lineCount =  __fbJson.iteratorBegin();
 
-		// Pick from the list.
-		String fortuneId = index[random(0, listObj.size())];
-		const char* fortune = listObj[fortuneId][FIELD_TEXT];
-		printDebug(fortune);
-		wrapTxtToScreen(__lcd, fortune);
+	printDebug("lineCount");
+	printDebug(String(lineCount));
+
+	wrapTxtToScreen(__lcd, "lineCount: " + String(lineCount));
+	delay(2000);
+
+	//if (Firebase.getJSON(__fbData, FORTUNES_PATH, __query)) {
+		// printDebug("Fortune data fetched.");
+
+		// __fbJson = __fbData.jsonObject();
+		// size_t lineCount =  __fbJson.iteratorBegin();
+		// // hacky nonsense to "parse" JSON
+		// uint8_t fortuneCounter = 0;
+		// String fortuneKey = "";
+
+		// String key, val, prefix;
+		// int type = 0;
+		// for (size_t i = 0; i < lineCount; i++) {
+		// 	 __fbJson.iteratorGet(i, type, key, val);
+
+		// 	// the worst of hackery
+		// 	if (type == 1 && key != "category" && key != "created" && key != "shown" && key != "text" && key != "total" && key != "lastVote" && key != "keep" && key != "rank") {
+		// 		// printDebug(key);
+		// 		fortuneKey = key;
+		// 	}
+		// 	// printDebug(String(i));
+		// 	// printDebug("type");
+		// 	// printDebug(String(type));
+		// 	// printDebug("key");
+		// 	// printDebug(key);
+		// 	// printDebug("val");
+		// 	// printDebug(val);
+		// 	// printDebug("- - - - - - - - - - - - -");
+		// 	// printDebug(String(fortuneCounter));
+		// 	// printDebug(key);
+
+		// 	// find the fortune text field in the results.
+		// 	if (key == "text") {
+		// 	// 	// select the random one.
+		// 		if (randomIndex == fortuneCounter) {
+
+		// 			// printDebug("Found it");
+		// 			// printDebug(val);
+		// 			// printDebug(fortuneKey);
+
+		// 	 		fortuneId = fortuneKey;
+		// 			fortuneText = val;
+		// 	// 		// printDebug(fortuneId);
+		// 	// 		// printDebug(fortuneText);
+		// 		}
+		// 		fortuneCounter++;
+		// 	}
+		// 	// if (fortuneId != "") {
+		// 	// 	break;
+		// 	// }
+		// 	delay(0);
+		// }
+		__fbJson.iteratorEnd();
+
+		fortuneId = "9";
+		fortuneText = "Will this even work?";
+
+	// } else {
+	// 	txtToScreen("Fetching failed", DELAY_MSG, 1);
+	// 	printDebug(__fbData.errorReason());
+	// }
+
+	printDebug("fortuneId");
+	printDebug(fortuneId);
+
+	if (fortuneId != "") {
+		wrapTxtToScreen(__lcd, fortuneText);
 		
 		// speak the fortune
-		char* filename = "";
-		strcpy(filename, "/audio-fortunes-");
+		filename = "";
+		strcpy(filename, "/f--");
 		strcat(filename, fortuneId.c_str());
 		strcat(filename, ".mp3");
 		sendSpi(filename);
@@ -439,11 +531,11 @@ void fetchFortune (const String category, uint16_t timeout, int version) {
 		}
 		// Record full interaction data.
 		saveInteractionEnd(fortuneId, result, category, version);
-	} else {
-		txtToScreen("Fetching failed", DELAY_MSG, 1);
-		printDebug(__fbData.errorReason());
 	}
+
+	__fbJson.clear();
 	__fbData.clear();
+	__query.clear();
 }
 
 /**
@@ -475,6 +567,7 @@ void askQuestion (String id, unsigned int version) {
 	// End of the question tree.
 	if (!questionFound) {
 		// saveInteractionMiddle(id, sensor, version);
+		sendSpi("/audio-phrases-6.mp3");
 		fetchFortune(id, QUESTION_TIMEOUT, version);
 		// @todo Handle no fortune.
 		return;
@@ -507,8 +600,8 @@ void askQuestion (String id, unsigned int version) {
 void coin () {
 	// Greeting routine.
 	printDebug("Coin! **********");
+	sendSpi("/audio-phrases-0.mp3");
 	if (CHROME) {
-		sendSpi("/audio-phrases-0.mp3");
 		play(WAKE_FRAMES, 19);
 		paint(MESSAGES[GREET1], DELAY_MSG);
 		play(APPEAR_FRAMES, 6);
@@ -555,13 +648,15 @@ void sleep () {
  */
 void runTests () {
 	if (!TESTING) return;
-	String tests[] = {"heart", "self", "wave", "health", "fortune"};
+	String tests[] = {"wave", "health", "fortune", "heart", "self"};
 	printDebug(F("Running fortune tests..."));
 	for (uint8_t t = 0; t < sizeof(tests)/sizeof(tests[0]); t++) {
 		saveInteractionInit();
 		// delay(FAST_TIMEOUT);
 		// saveInteractionMiddle("heart", 123.456, 0);
 		delay(FAST_TIMEOUT);
+		sendSpi("/audio-phrases-6.mp3");
+		saveInteractionInit();
 		fetchFortune(tests[t], FAST_TIMEOUT, 0);
 		printDebug(F(" "));
 		printDebug(F("- - - - - - - - - - - - - - - - - - - - - - -"));
@@ -581,11 +676,11 @@ void setup (void) {
 	SPI.begin();
   	esp.begin();
 
-	pinMode(TRIGGER_PIN, INPUT);
+	pinMode(TRIGGER_PIN, INPUT_PULLUP);
 	pinMode(BTN1_PULLUP, INPUT_PULLUP);
 	pinMode(BTN2_PULLUP, INPUT_PULLUP);
-	int analogVal = analogRead(ANALOG_PIN);
-	randomSeed(analogRead(analogVal));
+	// int analogVal = analogRead(ANALOG_PIN);
+	// randomSeed(analogRead(analogVal));
 
 	// On-the-fly alternate modes.
 	if (digitalRead(BTN1_PULLUP) == LOW) {
@@ -620,6 +715,12 @@ void setup (void) {
 }
 
 void loop (void) {
+	// wake message
+	if (hasWoke == false) {
+		sendSpi("/audio-phrases-11.mp3");
+		hasWoke = true;
+	}
+
 	// @todo Use interrupts for coin trigger listening.
 	// https://github.com/doublejosh/FortuneTeller/issues/1
 	__trigger = digitalRead(TRIGGER_PIN);
